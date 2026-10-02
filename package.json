@@ -1,0 +1,56 @@
+{
+  "name": "ruralcare-doctor-appointment",
+  "version": "2.0.0",
+  "description": "A comprehensive rural healthcare appointment system with offline support, analytics, and accessibility features",
+  "main": "app.js",
+  "scripts": {
+    "start": "node bacend/server.js",
+    "dev": "live-server . --port=3000 --host=localhost --watch",
+    "server": "node bacend/server.js",
+    "build": "echo 'Building project...' && npm run generate-icons",
+    "generate-icons": "node generate-icons.js",
+    "deploy": "firebase deploy --only hosting",
+    "test": "echo 'No tests specified' && exit 0",
+    "lint": "eslint *.js",
+    "format": "prettier --write \"**/*.{js,html,css,json}\"",
+    "clean": "rm -rf node_modules && rm -f package-lock.json",
+    "serve": "http-server . -p 3000 -c-1",
+    "watch": "nodemon --watch *.js --watch *.html --watch *.css --exec \"npm run serve\""
+  },
+  "keywords": [
+    "healthcare",
+    "appointment",
+    "rural",
+    "pwa",
+    "offline",
+    "accessibility",
+    "firebase",
+    "javascript",
+    "web-app"
+  ],
+  "author": "Akash Kalsariya <akashkalsariya@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "http-server": "^14.1.1",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akashkalsariya/Doctor-Appointment-System.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akashkalsariya/Doctor-Appointment-System/issues"
+  },
+  "homepage": "https://ruralcare.example.com",
+  "private": true
+}

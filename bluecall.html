@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueCall - Video & Phone Conferencing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PEERJS SDK -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    
+    <!-- EMOJI PICKER CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.14.0/dist/emoji-picker.min.css">
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Header Styles */
+        .app-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            z-index: 100;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .app-name {
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        /* Navigation Styles */
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .phone-nav-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .phone-nav-btn:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator i {
+            color: #4ade80;
+            font-size: 0.7rem;
+        }
+
+        /* Hamburger menu for mobile */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .video-container {
+            display: flex;
+            flex: 1;
+            gap: 1.5rem;
+            min-height: 400px;
+            position: relative;
+        }
+
+        /* Emoji Overlay Styles */
+        .emoji-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .emoji-bubble {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: floatUp 3s ease-in forwards;
+            pointer-events: none;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100%) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                transform: translateY(90%) scale(1);
+                opacity: 1;
+            }
+            90% {
+                transform: translateY(-100%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120%) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Video Card Styles */
+        .video-card {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .video-header {
+            background-color: #f8fafc;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .video-header h3 {
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .video-header h3 i {
+            color: #2563eb;
+        }
+
+        .connection-status {
+            font-size: 0.85rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .connection-status.connected {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .connection-status.active {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .connection-status.phone-call {
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        /* Video Wrapper */
+        .video-wrapper {
+            flex: 1;
+            position: relative;
+            background-color: #0f172a;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #475569;
+        }
+
+        .video-info {
+            padding: 1rem 1.5rem;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .participant-info {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* Video Layout */
+        .remote-video-wrapper {
+            flex: 2;
+        }
+
+        .local-video-wrapper {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .local-card {
+            height: 100%;
+        }
+
+        /* Controls Section */
+        .controls-container {
+            background-color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background-color: #f1f5f9;
+            border: none;
+            border-radius: 50px;
+            padding: 0.9rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-btn:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn i {
+            font-size: 1.2rem;
+        }
+
+        .control-btn.end-call {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .control-btn.end-call:hover {
+            background-color: #dc2626;
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .control-btn.emoji-btn {
+            background-color: #fbbf24;
+            color: #92400e;
+        }
+
+        .control-btn.emoji-btn:hover {
+            background-color: #f59e0b;
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .call-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .timer, .call-quality {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .timer i, .call-quality i {
+            color: #2563eb;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background-color: #2563eb;
+            color: white;
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .connection-id-container, .connection-action {
+            margin-bottom: 1.5rem;
+        }
+
+        .phone-call-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background-color: #f0f9ff;
+            border-radius: 12px;
+            border: 1px solid #bae6fd;
+        }
+
+        .phone-call-container h3 {
+            margin-bottom: 1rem;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .id-display, .id-input, .phone-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="tel"] {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="tel"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .copy-btn, .connect-btn, .demo-btn, .close-modal-btn, .call-phone-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .copy-btn {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .copy-btn:hover {
+            background-color: #bae6fd;
+        }
+
+        .connect-btn, .call-phone-btn {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .connect-btn:hover, .call-phone-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .demo-btn {
+            background-color: #10b981;
+            color: white;
+            flex: 2;
+        }
+
+        .demo-btn:hover {
+            background-color: #0da271;
+        }
+
+        .close-modal-btn {
+            background-color: #f1f5f9;
+            color: #475569;
+            flex: 1;
+        }
+
+        .close-modal-btn:hover {
+            background-color = '#e2e8f0';
+        }
+
+        /* API Configuration Section */
+        .api-config-container {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background-color: #fff7ed;
+            border-radius: 12px;
+            border: 1px solid #fed7aa;
+        }
+
+        .api-config-container h3 {
+            margin-bottom: 1rem;
+            color: #ea580c;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-note {
+            font-size: 0.85rem;
+            color: #9a3412;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .api-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .api-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Thank You Modal Styles */
+        .thank-you-icon {
+            margin-bottom: 1.5rem;
+        }
+
+        .thank-you-icon i {
+            font-size: 4rem;
+            color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .developer-info {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .developer-info h4 {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .developer-info p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        /* EMOJI PICKER MODAL */
+        .emoji-picker-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-picker-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .emoji-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .emoji-picker-header h3 {
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .emoji-category-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .emoji-category-btn:hover,
+        .emoji-category-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .emoji-item {
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .emoji-item:hover {
+            background: #e2e8f0;
+            transform: scale(1.2);
+        }
+
+        /* Share Link Container */
+        .share-link-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f0f9ff;
+            border-radius: 12px;
+            border: 1px solid #bae6fd;
+        }
+
+        .share-link-container h3 {
+            margin-bottom: 1rem;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-display {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-btn {
+            background-color: #25D366;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .video-container {
+                flex-direction: column;
+            }
+            
+            .local-video-wrapper {
+                max-width: 100%;
+            }
+            
+            .local-card {
+                max-height: 300px;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .emoji-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .hamburger {
+                display: flex;
+                position: absolute;
+                right: 1rem;
+                top: 1rem;
+            }
+            
+            .nav-container {
+                display: none;
+                width: 100%;
+                margin-top: 1rem;
+            }
+            
+            .nav-container.active {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            
+            .nav-links a {
+                padding: 0.8rem;
+                justify-content: center;
+            }
+            
+            .phone-nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-info {
+                align-self: flex-start;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .controls {
+                gap: 0.5rem;
+            }
+            
+            .control-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .btn-label {
+                display: none;
+            }
+            
+            .call-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .id-display, .id-input, .phone-input {
+                flex-direction: column;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .emoji-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-name {
+                font-size: 1.5rem;
+            }
+            
+            .video-header h3 {
+                font-size: 1rem;
+            }
+            
+            .controls {
+                gap: 0.3rem;
+            }
+            
+            .control-btn {
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .placeholder-icon {
+                font-size: 3rem;
+            }
+            
+            .emoji-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .emoji-item {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="logo-container">
+                <i class="fas fa-video logo-icon"></i>
+                <h1 class="app-name">BlueCall</h1>
+            </div>
+            
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <div class="nav-container" id="navContainer">
+                <ul class="nav-links">
+                    <li><a href="#" class="active" id="homeLink"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#" id="videoCallsLink"><i class="fas fa-video"></i> Video Calls</a></li>
+                    <li><a href="#" id="phoneLink"><i class="fas fa-phone"></i> Phone Calls</a></li>
+                    <li><a href="#" id="historyLink"><i class="fas fa-history"></i> History</a></li>
+                    <li><a href="#" id="settingsLink"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+                
+                <button class="phone-nav-btn" id="openPhoneModal">
+                    <i class="fas fa-phone-alt"></i> Make a Call
+                </button>
+                
+                <div class="header-info">
+                    <span class="status-indicator"><i class="fas fa-circle"></i> Ready to connect</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="video-container">
+                <!-- Emoji Overlay -->
+                <div class="emoji-overlay" id="emojiOverlay"></div>
+                
+                <!-- Remote Video Area -->
+                <div class="remote-video-wrapper">
+                    <div class="video-card remote-card">
+                        <div class="video-header">
+                            <h3><i class="fas fa-user"></i> Remote Participant</h3>
+                            <div class="connection-status connected" id="callStatus">
+                                <i class="fas fa-signal"></i> Connected
+                            </div>
+                        </div>
+                        <div class="video-wrapper">
+                            <video id="remoteVideo" autoplay playsinline class="video-element"></video>
+                            <div class="video-placeholder" id="remotePlaceholder">
+                                <i class="fas fa-user-friends placeholder-icon"></i>
+                                <p>Waiting for participant to join...</p>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <span id="remoteInfo" class="participant-info">No remote participant connected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Video Preview -->
+                <div class="local-video-wrapper">
+                    <div class="video-card local-card">
+                        <div class="video-header">
+                            <h3><i class="fas fa-user"></i> You</h3>
+                            <div class="connection-status active">
+                                <i class="fas fa-circle"></i> Active
+                            </div>
+                        </div>
+                        <div class="video-wrapper">
+                            <video id="localVideo" autoplay playsinline muted class="video-element"></video>
+                            <div class="video-placeholder" id="localPlaceholder">
+                                <i class="fas fa-video placeholder-icon"></i>
+                                <p>Camera preview</p>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <span id="localInfo" class="participant-info">You are connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-container">
+                <div class="controls">
+                    <button id="muteButton" class="control-btn" title="Mute/Unmute">
+                        <i class="fas fa-microphone"></i>
+                        <span class="btn-label">Mute</span>
+                    </button>
+                    
+                    <button id="cameraButton" class="control-btn" title="Turn Camera On/Off">
+                        <i class="fas fa-video"></i>
+                        <span class="btn-label">Camera On</span>
+                    </button>
+                    
+                    <button id="endCallButton" class="control-btn end-call" title="End Call">
+                        <i class="fas fa-phone-slash"></i>
+                        <span class="btn-label">End Call</span>
+                    </button>
+                    
+                    <button id="shareScreenButton" class="control-btn" title="Share Screen">
+                        <i class="fas fa-desktop"></i>
+                        <span class="btn-label">Share Screen</span>
+                    </button>
+                    
+                    <!-- NEW EMOJI BUTTON -->
+                    <button id="emojiButton" class="control-btn emoji-btn" title="Send Emoji">
+                        <i class="far fa-grin"></i>
+                        <span class="btn-label">Emoji</span>
+                    </button>
+                    
+                    <button id="participantsButton" class="control-btn" title="Participants">
+                        <i class="fas fa-users"></i>
+                        <span class="btn-label">Participants</span>
+                    </button>
+                </div>
+                
+                <div class="call-info">
+                    <div class="timer">
+                        <i class="far fa-clock"></i>
+                        <span id="callTimer">00:00</span>
+                    </div>
+                    <div class="call-quality">
+                        <i class="fas fa-wifi"></i>
+                        <span id="qualityStatus">Good Connection</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Call Connection Modal -->
+        <div id="connectionModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-link"></i> Connection Setup</h2>
+                </div>
+                <div class="modal-body">
+                    <p>To start a <strong>REAL video call</strong>, share your connection ID with the person you want to call, or enter their connection ID to connect to them.</p>
+                    
+                    <div class="connection-id-container">
+                        <label for="localId">Your Connection ID:</label>
+                        <div class="id-display">
+                            <input type="text" id="localId" readonly>
+                            <button id="copyIdBtn" class="copy-btn">
+                                <i class="far fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-action">
+                        <label for="remoteId">Enter Remote Connection ID:</label>
+                        <div class="id-input">
+                            <input type="text" id="remoteId" placeholder="e.g., BLUE-USER-002">
+                            <button id="connectBtn" class="connect-btn">
+                                <i class="fas fa-phone-alt"></i> Connect
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- API Configuration Section -->
+                    <div class="api-config-container">
+                        <h3><i class="fas fa-cog"></i> Twilio API Configuration (Phone Calls Only)</h3>
+                        <div class="phone-input-container">
+                            <label for="accountSid">Account SID:</label>
+                            <input type="text" id="accountSid" placeholder="ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" value="">
+                            
+                            <label for="authToken" style="margin-top: 10px;">Auth Token:</label>
+                            <input type="text" id="authToken" placeholder="Your Twilio Auth Token" value="">
+                            
+                            <label for="twilioPhone" style="margin-top: 10px;">Twilio Phone Number:</label>
+                            <input type="tel" id="twilioPhone" placeholder="+1234567890" value="">
+                            
+                            <p class="api-note">
+                                <i class="fas fa-info-circle"></i> <strong>Note:</strong> Video calls work WITHOUT Twilio using PeerJS. 
+                                Only phone calls require Twilio configuration.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="phone-call-container">
+                        <h3><i class="fas fa-phone"></i> Call Phone Number</h3>
+                        <div class="phone-input-container">
+                            <label for="phoneNumber">Enter Phone Number to Call:</label>
+                            <div class="phone-input">
+                                <input type="tel" id="phoneNumber" placeholder="+1234567890">
+                                <button id="callPhoneBtn" class="call-phone-btn">
+                                    <i class="fas fa-phone-alt"></i> Call
+                                </button>
+                            </div>
+                            <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 5px;">
+                                Format: +CountryCode Number (e.g., +1234567890)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- SHARE LINK CONTAINER -->
+                    <div class="share-link-container">
+                        <h3><i class="fas fa-share-alt"></i> Share Call Link</h3>
+                        <p style="color: #64748b; margin-bottom: 1rem;">Share this link with anyone to join your call instantly:</p>
+                        
+                        <div class="link-display">
+                            <input type="text" id="callLink" readonly style="flex: 1; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                            <button id="copyLinkBtn" class="copy-btn" style="margin-left: 10px;">
+                                <i class="far fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        
+                        <div class="share-buttons">
+                            <button id="whatsappShareBtn" class="share-btn whatsapp-btn">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button id="copyForWhatsappBtn" class="share-btn">
+                                <i class="fas fa-copy"></i> Copy for WhatsApp
+                            </button>
+                        </div>
+                        
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 1rem;">
+                            <i class="fas fa-info-circle"></i> Friend just needs to click the link - no app install needed!
+                        </p>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button id="startRealVideoCallBtn" class="demo-btn">
+                            <i class="fas fa-video"></i> Start REAL Video Call
+                        </button>
+                        <button id="closeModalBtn" class="close-modal-btn">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- EMOJI PICKER MODAL -->
+        <div id="emojiPickerModal" class="emoji-picker-modal">
+            <div class="emoji-picker-content">
+                <div class="emoji-picker-header">
+                    <h3><i class="far fa-grin"></i> Select Emoji</h3>
+                    <button id="closeEmojiPicker" class="close-modal-btn" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="emoji-categories" id="emojiCategories">
+                    <button class="emoji-category-btn active" data-category="smileys">😊 Smileys</button>
+                    <button class="emoji-category-btn" data-category="hearts">❤️ Hearts</button>
+                    <button class="emoji-category-btn" data-category="hands">👏 Hands</button>
+                    <button class="emoji-category-btn" data-category="animals">🐱 Animals</button>
+                    <button class="emoji-category-btn" data-category="food">🍕 Food</button>
+                </div>
+                
+                <div class="emoji-grid" id="emojiGrid">
+                    <!-- Emojis will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thank You Message Modal -->
+        <div id="thankYouModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-heart"></i> Thank You!</h2>
+                </div>
+                <div class="modal-body" style="text-align: center; padding: 2rem;">
+                    <div class="thank-you-icon">
+                        <i class="fas fa-check-circle" style="font-size: 4rem; color: #10b981; margin-bottom: 1rem;"></i>
+                    </div>
+                    <h3 style="color: #2563eb; margin-bottom: 1rem;">Thank you for using RuralCare Doctor Appointment System for BlueCall</h3>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">Your call has ended successfully. We appreciate you choosing BlueCall for your communication needs.</p>
+                    
+                    <div class="developer-info">
+                        <h4 style="color: white; margin-bottom: 0.5rem; font-size: 1.2rem;">BlueCall Video Conferencing Platform</h4>
+                        <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem;">Developed with ❤️ by Raj Golu Shukla</p>
+                    </div>
+                    
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 1.5rem;">Ready for your next call? Start a new connection anytime!</p>
+                    
+                    <button id="startNewCallBtn" class="connect-btn" style="margin-top: 1.5rem; padding: 0.8rem 2rem;">
+                        <i class="fas fa-phone-alt"></i> Start New Call
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== PEERJS REAL VIDEO CALL ====================
+
+        // Global variables
+        let peer;
+        let currentCall;
+        let localStream;
+        let remoteStream;
+        let isMuted = false;
+        let isCameraOff = false;
+        let isInCall = false;
+        let callStartTime = null;
+        let timerInterval = null;
+        let isScreenSharing = false;
+
+        // DOM Elements
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const remotePlaceholder = document.getElementById('remotePlaceholder');
+        const localPlaceholder = document.getElementById('localPlaceholder');
+        const muteButton = document.getElementById('muteButton');
+        const cameraButton = document.getElementById('cameraButton');
+        const endCallButton = document.getElementById('endCallButton');
+        const shareScreenButton = document.getElementById('shareScreenButton');
+        const emojiButton = document.getElementById('emojiButton');
+        const participantsButton = document.getElementById('participantsButton');
+        const startRealVideoCallBtn = document.getElementById('startRealVideoCallBtn');
+        const connectBtn = document.getElementById('connectBtn');
+        const connectionModal = document.getElementById('connectionModal');
+        const localIdInput = document.getElementById('localId');
+        const remoteIdInput = document.getElementById('remoteId');
+        const phoneNumberInput = document.getElementById('phoneNumber');
+        const copyIdBtn = document.getElementById('copyIdBtn');
+        const callPhoneBtn = document.getElementById('callPhoneBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const callTimer = document.getElementById('callTimer');
+        const localInfo = document.getElementById('localInfo');
+        const remoteInfo = document.getElementById('remoteInfo');
+        const callStatus = document.getElementById('callStatus');
+        const qualityStatus = document.getElementById('qualityStatus');
+        const thankYouModal = document.getElementById('thankYouModal');
+        const startNewCallBtn = document.getElementById('startNewCallBtn');
+        const hamburger = document.getElementById('hamburger');
+        const navContainer = document.getElementById('navContainer');
+        const accountSidInput = document.getElementById('accountSid');
+        const authTokenInput = document.getElementById('authToken');
+        const twilioPhoneInput = document.getElementById('twilioPhone');
+        
+        // New DOM Elements for Link Sharing
+        const callLinkInput = document.getElementById('callLink');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+        const copyForWhatsappBtn = document.getElementById('copyForWhatsappBtn');
+        
+        // New DOM Elements for Emoji Feature
+        const emojiPickerModal = document.getElementById('emojiPickerModal');
+        const closeEmojiPicker = document.getElementById('closeEmojiPicker');
+        const emojiGrid = document.getElementById('emojiGrid');
+        const emojiCategories = document.getElementById('emojiCategories');
+        const emojiOverlay = document.getElementById('emojiOverlay');
+
+        // Emoji data by categories
+        const emojiData = {
+            smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸'],
+            hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '💌', '💋', '👄', '🫀', '🫂'],
+            hands: ['👏', '🙌', '👐', '🤲', '🤝', '👍', '👎', '👊', '✊', '🤛', '🤜', '🤞', '✌️', '🤟', '🤘', '👌', '🤌', '🤏', '👈', '👉', '👆', '👇', '☝️', '✋', '🤚', '🖐️', '🖖', '👋', '🤙', '💪'],
+            animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇'],
+            food: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅']
+        };
+
+        // ==================== INITIALIZATION ====================
+        async function init() {
+            try {
+                // Generate random user ID
+                const userId = `Raj-Golu-${Math.floor(100 + Math.random() * 900)}`;
+                localIdInput.value = userId;
+                
+                // Load saved Twilio credentials
+                loadTwilioCredentials();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Initialize emoji picker
+                initEmojiPicker();
+                
+                // Show connection modal
+                connectionModal.style.display = 'flex';
+                
+                // Initial state
+                localPlaceholder.innerHTML = `<i class="fas fa-video placeholder-icon"></i><p>Ready for real video call</p>`;
+                localInfo.textContent = 'Click "Start REAL Video Call" to begin';
+                
+                // Update call link
+                updateCallLink();
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        // ==================== EVENT LISTENERS SETUP ====================
+        function setupEventListeners() {
+            // Real Video Call Button
+            startRealVideoCallBtn.addEventListener('click', startRealVideoCall);
+            
+            // Connect Button (for connecting to specific ID)
+            connectBtn.addEventListener('click', connectToPeer);
+            
+            // Control Buttons
+            muteButton.addEventListener('click', toggleMute);
+            cameraButton.addEventListener('click', toggleCamera);
+            endCallButton.addEventListener('click', endCall);
+            shareScreenButton.addEventListener('click', toggleScreenShare);
+            emojiButton.addEventListener('click', openEmojiPicker);
+            participantsButton.addEventListener('click', showParticipants);
+            
+            // Modal buttons
+            copyIdBtn.addEventListener('click', copyConnectionId);
+            callPhoneBtn.addEventListener('click', initiatePhoneCall);
+            closeModalBtn.addEventListener('click', () => {
+                connectionModal.style.display = 'none';
+            });
+            
+            // Link sharing buttons
+            if (copyLinkBtn) copyLinkBtn.addEventListener('click', copyCallLink);
+            if (whatsappShareBtn) whatsappShareBtn.addEventListener('click', shareOnWhatsApp);
+            if (copyForWhatsappBtn) copyForWhatsappBtn.addEventListener('click', copyForWhatsApp);
+            
+            // Emoji picker buttons
+            if (closeEmojiPicker) closeEmojiPicker.addEventListener('click', closeEmojiPickerFunc);
+            
+            // Thank you modal button
+            startNewCallBtn.addEventListener('click', () => {
+                thankYouModal.style.display = 'none';
+                connectionModal.style.display = 'flex';
+            });
+            
+            // Save Twilio credentials
+            accountSidInput.addEventListener('change', saveTwilioCredentials);
+            authTokenInput.addEventListener('change', saveTwilioCredentials);
+            twilioPhoneInput.addEventListener('change', saveTwilioCredentials);
+            
+            // Navigation
+            hamburger.addEventListener('click', toggleMobileMenu);
+            
+            // Navigation links
+            document.getElementById('homeLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(document.getElementById('homeLink'));
+                alert('🏠 Home Page\n\nThis is the main video conferencing interface.');
+            });
+            
+            document.getElementById('videoCallsLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(document.getElementById('videoCallsLink'));
+                connectionModal.style.display = 'flex';
+                remoteIdInput.focus();
+            });
+            
+            document.getElementById('phoneLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(document.getElementById('phoneLink'));
+                connectionModal.style.display = 'flex';
+                phoneNumberInput.focus();
+            });
+            
+            document.getElementById('historyLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(document.getElementById('historyLink'));
+                alert('📜 Call History\n\nView your past calls.');
+            });
+            
+            document.getElementById('settingsLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(document.getElementById('settingsLink'));
+                alert('⚙️ Settings\n\nConfigure your preferences.');
+            });
+            
+            document.getElementById('openPhoneModal').addEventListener('click', () => {
+                connectionModal.style.display = 'flex';
+                phoneNumberInput.focus();
+            });
+            
+            // Phone number formatting
+            phoneNumberInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value && !value.startsWith('+')) {
+                    value = '+' + value;
+                }
+                e.target.value = value;
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === connectionModal) {
+                    connectionModal.style.display = 'none';
+                }
+                if (e.target === thankYouModal) {
+                    thankYouModal.style.display = 'none';
+                }
+                if (e.target === emojiPickerModal) {
+                    closeEmojiPickerFunc();
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'm' || e.key === 'M') toggleMute();
+                if (e.key === 'c' || e.key === 'C') toggleCamera();
+                if (e.key === 'Escape' && isInCall) endCall();
+                if (e.key === 'e' || e.key === 'E') openEmojiPicker();
+            });
+        }
+
+        // ==================== EMOJI FEATURE FUNCTIONS ====================
+        function initEmojiPicker() {
+            // Load smileys by default
+            loadEmojis('smileys');
+            
+            // Add event listeners to category buttons
+            const categoryBtns = emojiCategories.querySelectorAll('.emoji-category-btn');
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+                    // Load emojis for selected category
+                    const category = btn.getAttribute('data-category');
+                    loadEmojis(category);
+                });
+            });
+        }
+
+        function loadEmojis(category) {
+            emojiGrid.innerHTML = '';
+            
+            if (emojiData[category]) {
+                emojiData[category].forEach(emoji => {
+                    const emojiElement = document.createElement('div');
+                    emojiElement.className = 'emoji-item';
+                    emojiElement.textContent = emoji;
+                    emojiElement.title = `Send ${emoji}`;
+                    emojiElement.addEventListener('click', () => sendEmoji(emoji));
+                    emojiGrid.appendChild(emojiElement);
+                });
+            }
+        }
+
+        function openEmojiPicker() {
+            if (!isInCall) {
+                showNotification('Start a call first to send emojis!', 'info');
+                return;
+            }
+            emojiPickerModal.style.display = 'flex';
+        }
+
+        function closeEmojiPickerFunc() {
+            emojiPickerModal.style.display = 'none';
+        }
+
+        function sendEmoji(emoji) {
+            if (!isInCall) return;
+            
+            // Show emoji on local screen
+            showEmojiOnScreen(emoji, 'local');
+            
+            // If we have a peer connection, send the emoji to remote
+            if (currentCall && currentCall.peerConnection) {
+                // In a real app, you would send this via data channel
+                // For now, we'll just show it locally
+                showNotification(`Sent emoji: ${emoji}`, 'success');
+            }
+            
+            // Close the emoji picker
+            closeEmojiPickerFunc();
+            
+            // Also show on remote screen (simulated for demo)
+            setTimeout(() => {
+                showEmojiOnScreen(emoji, 'remote');
+            }, 300);
+        }
+
+        function showEmojiOnScreen(emoji, target = 'local') {
+            const videoContainer = document.querySelector('.video-container');
+            const emojiBubble = document.createElement('div');
+            emojiBubble.className = 'emoji-bubble';
+            emojiBubble.textContent = emoji;
+            
+            // Random position
+            const x = Math.random() * 80 + 10; // 10% to 90%
+            const y = Math.random() * 60 + 20; // 20% to 80%
+            
+            emojiBubble.style.left = `${x}%`;
+            emojiBubble.style.top = `${y}%`;
+            
+            // Different styles for local vs remote
+            if (target === 'remote') {
+                emojiBubble.style.fontSize = '2.2rem';
+                emojiBubble.style.filter = 'drop-shadow(0 4px 8px rgba(255,0,0,0.3))';
+            }
+            
+            emojiOverlay.appendChild(emojiBubble);
+            
+            // Remove emoji after animation
+            setTimeout(() => {
+                if (emojiBubble.parentNode) {
+                    emojiBubble.parentNode.removeChild(emojiBubble);
+                }
+            }, 3000);
+        }
+
+        // ==================== LINK SHARING FUNCTIONS ====================
+        function generateCallLink(userId) {
+            // Using your ID Raj-Golu-87091
+            return `https://rajgolushukla-ruralcare.netlify.app/welcome.html?host=${userId}`;
+        }
+
+        function updateCallLink() {
+            const userId = localIdInput.value;
+            const callLink = generateCallLink(userId);
+            
+            if (callLinkInput) {
+                callLinkInput.value = callLink;
+            }
+            
+            return callLink;
+        }
+
+        function copyCallLink() {
+            const callLink = updateCallLink();
+            
+            navigator.clipboard.writeText(callLink)
+                .then(() => {
+                    showNotification('✅ Call link copied to clipboard!', 'success');
+                    
+                    // Update button temporarily
+                    const originalText = copyLinkBtn.innerHTML;
+                    copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyLinkBtn.style.backgroundColor = '#10b981';
+                    copyLinkBtn.style.color = 'white';
+                    
+                    setTimeout(() => {
+                        copyLinkBtn.innerHTML = originalText;
+                        copyLinkBtn.style.backgroundColor = '';
+                        copyLinkBtn.style.color = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    showNotification('❌ Failed to copy link', 'error');
+                });
+        }
+
+        function shareOnWhatsApp() {
+            const callLink = updateCallLink();
+            const message = `🎥 *BlueCall Video Conference Invitation* 🎥
+
+Join my video call by clicking this link:
+🔗 ${callLink}
+
+No download needed! Just click and join.
+
+_This call is powered by BlueCall Video Conferencing Platform_`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+            showNotification('✅ Opening WhatsApp...', 'success');
+        }
+
+        function copyForWhatsApp() {
+            const callLink = updateCallLink();
+            const message = `🎥 BlueCall Video Conference Invitation 🎥\n\nJoin my video call by clicking this link:\n🔗 ${callLink}\n\nNo download needed! Just click and join.`;
+            
+            navigator.clipboard.writeText(message)
+                .then(() => {
+                    showNotification('✅ WhatsApp message copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    showNotification('❌ Failed to copy message', 'error');
+                });
+        }
+
+        // ==================== REAL VIDEO CALL WITH PEERJS ====================
+        async function startRealVideoCall() {
+            try {
+                // 1. Camera aur microphone access
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                
+                // 2. Local video show karein
+                localVideo.srcObject = localStream;
+                localPlaceholder.style.display = 'none';
+                localInfo.textContent = 'Camera and microphone active';
+                
+                // 3. PeerJS initialize karein
+                const localId = localIdInput.value;
+                peer = new Peer(localId, {
+                    debug: 2,
+                    config: {
+                        'iceServers': [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:stun2.l.google.com:19302' }
+                        ]
+                    }
+                });
+                
+                // 4. Peer events handle karein
+                setupPeerEvents();
+                
+                // 5. Hide modal
+                connectionModal.style.display = 'none';
+                
+                // 6. Show notification
+                showNotification('✅ Ready for real call! Share your ID: ' + localId, 'success');
+                
+            } catch (error) {
+                console.error('Error starting video call:', error);
+                showNotification('❌ Camera access denied. Please allow permissions.', 'error');
+            }
+        }
+
+        // ==================== PEERJS EVENTS SETUP ====================
+        function setupPeerEvents() {
+            // Peer connected
+            peer.on('open', (id) => {
+                console.log('Peer connected with ID:', id);
+                localIdInput.value = id;
+                updateCallLink(); // Update link with new ID
+                showNotification('✅ Connected to PeerJS server with ID: ' + id, 'success');
+            });
+            
+            // Incoming call handle karein
+            peer.on('call', async (call) => {
+                if (confirm(`📞 Incoming call from ${call.peer}. Accept?`)) {
+                    // Call accept karein
+                    call.answer(localStream);
+                    currentCall = call;
+                    
+                    // Setup call handlers
+                    setupCallHandlers(call);
+                    
+                    // Update UI
+                    isInCall = true;
+                    startCallTimer();
+                    
+                    showNotification(`✅ Connected to ${call.peer}`, 'success');
+                }
+            });
+            
+            // Connection error handle karein
+            peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                showNotification('❌ Connection error: ' + err.message, 'error');
+            });
+            
+            // Disconnected
+            peer.on('disconnected', () => {
+                console.log('Peer disconnected');
+                showNotification('⚠️ Disconnected from server. Reconnecting...', 'warning');
+                // Auto-reconnect
+                if (peer && !peer.destroyed) {
+                    peer.reconnect();
+                }
+            });
+        }
+
+        // ==================== CONNECT TO SPECIFIC PEER ====================
+        async function connectToPeer() {
+            const remoteId = remoteIdInput.value.trim();
+            
+            if (!remoteId) {
+                alert('Please enter a remote ID');
+                return;
+            }
+            
+            if (!peer) {
+                alert('Please start video call first');
+                return;
+            }
+            
+            if (!localStream) {
+                alert('Please allow camera access first');
+                return;
+            }
+            
+            try {
+                // Call initiate karein
+                const call = peer.call(remoteId, localStream);
+                currentCall = call;
+                
+                // Setup call handlers
+                setupCallHandlers(call);
+                
+                // Update UI
+                connectionModal.style.display = 'none';
+                isInCall = true;
+                startCallTimer();
+                
+                showNotification(`📞 Calling ${remoteId}...`, 'info');
+                
+            } catch (error) {
+                console.error('Error calling peer:', error);
+                showNotification('❌ Failed to call: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== CALL HANDLERS ====================
+        function setupCallHandlers(call) {
+            // Remote stream receive karein
+            call.on('stream', (stream) => {
+                remoteStream = stream;
+                remoteVideo.srcObject = stream;
+                remotePlaceholder.style.display = 'none';
+                remoteInfo.textContent = `Connected to: ${call.peer}`;
+                
+                // Call status update
+                callStatus.innerHTML = '<i class="fas fa-video"></i> Live Video Call';
+                callStatus.className = 'connection-status active';
+                
+                showNotification('✅ Video call connected!', 'success');
+            });
+            
+            // Call ended
+            call.on('close', () => {
+                console.log('Call ended');
+                endCall();
+            });
+            
+            // Call error
+            call.on('error', (err) => {
+                console.error('Call error:', err);
+                showNotification('❌ Call error: ' + err.message, 'error');
+                endCall();
+            });
+        }
+
+        // ==================== CALL CONTROLS ====================
+        function toggleMute() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    isMuted = !isMuted;
+                    audioTrack.enabled = !isMuted;
+                    
+                    // Update button UI
+                    const icon = muteButton.querySelector('i');
+                    const label = muteButton.querySelector('.btn-label');
+                    
+                    if (isMuted) {
+                        icon.className = 'fas fa-microphone-slash';
+                        label.textContent = 'Unmute';
+                        muteButton.style.backgroundColor = '#fecaca';
+                        muteButton.style.color = '#991b1b';
+                        showNotification('🔇 Microphone muted', 'info');
+                    } else {
+                        icon.className = 'fas fa-microphone';
+                        label.textContent = 'Mute';
+                        muteButton.style.backgroundColor = '';
+                        muteButton.style.color = '';
+                        showNotification('🎤 Microphone unmuted', 'success');
+                    }
+                }
+            }
+        }
+
+        function toggleCamera() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    isCameraOff = !isCameraOff;
+                    videoTrack.enabled = !isCameraOff;
+                    
+                    // Update button UI
+                    const icon = cameraButton.querySelector('i');
+                    const label = cameraButton.querySelector('.btn-label');
+                    
+                    if (isCameraOff) {
+                        icon.className = 'fas fa-video-slash';
+                        label.textContent = 'Camera Off';
+                        cameraButton.style.backgroundColor = '#fecaca';
+                        cameraButton.style.color = '#991b1b';
+                        localPlaceholder.style.display = 'flex';
+                        localPlaceholder.innerHTML = `<i class="fas fa-video-slash placeholder-icon"></i><p>Camera is off</p>`;
+                        showNotification('📷 Camera turned off', 'info');
+                    } else {
+                        icon.className = 'fas fa-video';
+                        label.textContent = 'Camera On';
+                        cameraButton.style.backgroundColor = '';
+                        cameraButton.style.color = '';
+                        localPlaceholder.style.display = 'none';
+                        showNotification('📷 Camera turned on', 'success');
+                    }
+                }
+            }
+        }
+
+        async function toggleScreenShare() {
+            try {
+                if (!isScreenSharing) {
+                    // Start screen sharing
+                    const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: true
+                    });
+                    
+                    // Replace video track in current call
+                    const videoTrack = screenStream.getVideoTracks()[0];
+                    if (currentCall && currentCall.peerConnection) {
+                        const sender = currentCall.peerConnection.getSenders()
+                            .find(s => s.track && s.track.kind === 'video');
+                        if (sender) {
+                            sender.replaceTrack(videoTrack);
+                        }
+                    }
+                    
+                    // Update local video
+                    localVideo.srcObject = screenStream;
+                    
+                    // Update UI
+                    shareScreenButton.style.backgroundColor = '#3b82f6';
+                    shareScreenButton.style.color = 'white';
+                    isScreenSharing = true;
+                    showNotification('🖥️ Screen sharing started', 'success');
+                    
+                    // Stop screen sharing when track ends
+                    videoTrack.onended = () => {
+                        toggleScreenShare();
+                    };
+                    
+                } else {
+                    // Stop screen sharing
+                    const cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: true
+                    });
+                    
+                    const videoTrack = cameraStream.getVideoTracks()[0];
+                    if (currentCall && currentCall.peerConnection) {
+                        const sender = currentCall.peerConnection.getSenders()
+                            .find(s => s.track && s.track.kind === 'video');
+                        if (sender) {
+                            sender.replaceTrack(videoTrack);
+                        }
+                    }
+                    
+                    // Restore camera
+                    localVideo.srcObject = localStream;
+                    
+                    // Update UI
+                    shareScreenButton.style.backgroundColor = '';
+                    shareScreenButton.style.color = '';
+                    isScreenSharing = false;
+                    showNotification('📷 Screen sharing stopped', 'info');
+                }
+            } catch (error) {
+                console.error('Screen share error:', error);
+                showNotification('❌ Failed to share screen', 'error');
+            }
+        }
+
+        function showParticipants() {
+            const participants = ['You (Host)', 'Remote Participant'];
+            alert(`👥 Participants in the call:\n\n${participants.map(p => `• ${p}`).join('\n')}`);
+        }
+
+        function endCall() {
+            if (currentCall) {
+                currentCall.close();
+                currentCall = null;
+            }
+            
+            if (peer) {
+                peer.disconnect();
+            }
+            
+            // Stop local stream tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Clear emoji overlay
+            emojiOverlay.innerHTML = '';
+            
+            // Reset UI
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+            remotePlaceholder.style.display = 'flex';
+            remotePlaceholder.innerHTML = `<i class="fas fa-phone-slash placeholder-icon"></i><p>Call ended</p>`;
+            localPlaceholder.style.display = 'flex';
+            localPlaceholder.innerHTML = `<i class="fas fa-video-slash placeholder-icon"></i><p>Camera stopped</p>`;
+            remoteInfo.textContent = 'No remote participant connected';
+            localInfo.textContent = 'Call ended';
+            
+            // Reset control buttons
+            muteButton.style.backgroundColor = '';
+            muteButton.style.color = '';
+            cameraButton.style.backgroundColor = '';
+            cameraButton.style.color = '';
+            shareScreenButton.style.backgroundColor = '';
+            shareScreenButton.style.color = '';
+            emojiButton.style.backgroundColor = '';
+            emojiButton.style.color = '';
+            
+            // Reset call status
+            callStatus.className = 'connection-status connected';
+            callStatus.innerHTML = '<i class="fas fa-signal"></i> Connected';
+            
+            // Reset states
+            isMuted = false;
+            isCameraOff = false;
+            isScreenSharing = false;
+            isInCall = false;
+            
+            // Stop timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            callTimer.textContent = '00:00';
+            
+            // Reset quality status
+            qualityStatus.textContent = 'Good Connection';
+            
+            // Show thank you modal
+            setTimeout(() => {
+                thankYouModal.style.display = 'flex';
+            }, 500);
+            
+            showNotification('📞 Call ended', 'info');
+        }
+
+        // ==================== TIMER FUNCTION ====================
+        function startCallTimer() {
+            callStartTime = new Date();
+            
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - callStartTime) / 1000);
+                
+                const minutes = Math.floor(diff / 60);
+                const seconds = diff % 60;
+                
+                callTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update quality indicator
+                if (diff === 10) {
+                    qualityStatus.textContent = 'Excellent Connection';
+                } else if (diff === 30) {
+                    qualityStatus.textContent = 'Stable Connection';
+                }
+            }, 1000);
+        }
+
+        // ==================== TWILIO FUNCTIONS ====================
+        function loadTwilioCredentials() {
+            const savedAccountSid = localStorage.getItem('twilio_account_sid');
+            const savedAuthToken = localStorage.getItem('twilio_auth_token');
+            const savedPhone = localStorage.getItem('twilio_phone');
+            
+            if (savedAccountSid) accountSidInput.value = savedAccountSid;
+            if (savedAuthToken) authTokenInput.value = savedAuthToken;
+            if (savedPhone) twilioPhoneInput.value = savedPhone;
+        }
+
+        function saveTwilioCredentials() {
+            localStorage.setItem('twilio_account_sid', accountSidInput.value);
+            localStorage.setItem('twilio_auth_token', authTokenInput.value);
+            localStorage.setItem('twilio_phone', twilioPhoneInput.value);
+            showNotification('Twilio credentials saved', 'success');
+        }
+
+        async function initiatePhoneCall() {
+            const phoneNumber = phoneNumberInput.value.trim();
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            if (!phoneNumber.startsWith('+')) {
+                alert('Please include country code (e.g., +1234567890)');
+                return;
+            }
+            
+            // Demo phone call
+            const useDemo = confirm(
+                'For REAL phone calls, you need Twilio configuration.\n\n' +
+                'Click OK for a DEMO phone call simulation.'
+            );
+            
+            if (useDemo) {
+                connectionModal.style.display = 'none';
+                simulatePhoneCall(phoneNumber);
+            }
+        }
+
+        function simulatePhoneCall(phoneNumber) {
+            // Show phone call UI
+            localPlaceholder.style.display = 'flex';
+            localPlaceholder.innerHTML = `<i class="fas fa-phone-alt placeholder-icon"></i><p>Phone Call in Progress</p>`;
+            localInfo.textContent = 'Phone call active';
+            
+            // Disable video controls
+            cameraButton.disabled = true;
+            shareScreenButton.disabled = true;
+            cameraButton.style.opacity = '0.5';
+            shareScreenButton.style.opacity = '0.5';
+            
+            // Show connecting
+            remotePlaceholder.innerHTML = `<i class="fas fa-spinner fa-spin placeholder-icon"></i><p>Dialing ${phoneNumber}...</p>`;
+            remoteInfo.textContent = `Dialing: ${phoneNumber}`;
+            showNotification(`Dialing ${phoneNumber}...`, 'info');
+            
+            setTimeout(() => {
+                // Simulate call answered
+                isInCall = true;
+                remotePlaceholder.style.display = 'flex';
+                remotePlaceholder.innerHTML = `<i class="fas fa-phone-alt placeholder-icon"></i><p>Phone Call Connected</p>`;
+                remoteInfo.textContent = `Connected to: ${phoneNumber}`;
+                
+                // Start timer
+                startCallTimer();
+                
+                // Update UI
+                callStatus.innerHTML = '<i class="fas fa-phone"></i> Phone Call Active';
+                callStatus.className = 'connection-status phone-call';
+                qualityStatus.textContent = 'Voice Call Quality: Good';
+                
+                showNotification('📞 Phone call connected!', 'success');
+                
+            }, 2000);
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function copyConnectionId() {
+            localIdInput.select();
+            localIdInput.setSelectionRange(0, 99999);
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(localIdInput.value)
+                    .then(() => {
+                        showCopyFeedback();
+                    })
+                    .catch(err => {
+                        document.execCommand('copy');
+                        showCopyFeedback();
+                    });
+            } else {
+                document.execCommand('copy');
+                showCopyFeedback();
+            }
+        }
+        
+        function showCopyFeedback() {
+            const originalText = copyIdBtn.innerHTML;
+            copyIdBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            copyIdBtn.style.backgroundColor = '#10b981';
+            copyIdBtn.style.color = 'white';
+            
+            setTimeout(() => {
+                copyIdBtn.innerHTML = originalText;
+                copyIdBtn.style.backgroundColor = '';
+                copyIdBtn.style.color = '';
+            }, 2000);
+        }
+
+        function setActiveNav(activeLink) {
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            activeLink.classList.add('active');
+        }
+
+        function toggleMobileMenu() {
+            navContainer.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+                font-weight: 500;
+            `;
+            
+            notification.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+            
+            // Add CSS for animations
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // ==================== INITIALIZE APP ====================
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html
+
+
+
+
+
+
+
+
+
+       <!-- link & id -->
+      <!-- 🔗 Link: https://rajgolushukla-ruralcare.netlify.app -->
+<!-- 🆔 My ID: Raj-Golu-844  it is change ervery time  --> --> --> -->

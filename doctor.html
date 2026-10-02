@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Details - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <header>
+        <button onclick="window.history.back()" class="back-btn">
+            ← Back
+        </button>
+        
+        <h1 id="doctorTitle">Doctor Details</h1>
+        
+        <button onclick="window.location.href='index.html'" class="home-btn">
+            🏠 Home
+        </button>
+    </header>
+
+    <main id="main-content">
+        <!-- Doctor Details Section -->
+        <div id="doctorDetail" class="doctor-detail-container">
+            <!-- Content will be loaded dynamically -->
+            <div class="loading" id="loading">
+                Loading doctor details...
+            </div>
+        </div>
+
+        <!-- Quick Booking Form -->
+        <div class="booking-section">
+            <h2>📅 Quick Booking</h2>
+            
+            <form id="quickBooking">
+                <div class="form-group">
+                    <label for="bookingDate">Select Date:</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="timeSlot">Select Time Slot:</label>
+                    <div id="availability" class="time-slots">
+                        <!-- Time slots will be loaded dynamically -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symptoms">Symptoms (Optional):</label>
+                    <textarea id="symptoms" placeholder="Describe your symptoms..." rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="book-now-btn" onclick="bookNow()">
+                    📅 Book Appointment Now
+                </button>
+            </form>
+            
+            <p class="note">
+                ⏱️ Consultation time: 15-20 minutes<br>
+                💰 Payment at clinic | 🚗 Free parking available
+            </p>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h2>⭐ Reviews & Ratings</h2>
+            
+            <div id="reviews">
+                <!-- Reviews will be loaded dynamically -->
+                <div class="loading">
+                    Loading reviews...
+                </div>
+            </div>
+            
+            <button onclick="showReviewForm()" class="add-review-btn">
+                ✍️ Add Your Review
+            </button>
+        </div>
+
+        <!-- Map Section -->
+        <div class="map-section">
+            <h2>📍 Clinic Location</h2>
+            <div id="mapContainer" class="map-container">
+                <!-- Map will be loaded dynamically -->
+            </div>
+            
+            <div class="location-details">
+                <h3>Address Details</h3>
+                <p id="clinicAddress">Loading address...</p>
+                <button onclick="getDirections()" class="directions-btn">
+                    🗺️ Get Directions
+                </button>
+            </div>
+        </div>
+
+        <!-- Similar Doctors -->
+        <div class="similar-doctors" id="similarDoctors">
+            <h2>👨‍⚕️ Similar Doctors</h2>
+            <div class="doctors-grid">
+                <!-- Similar doctors will be loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <h3>What should I bring to my appointment?</h3>
+                <p>Please bring your ID proof, any previous medical records, and a list of current medications.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Can I reschedule my appointment?</h3>
+                <p>Yes, you can reschedule up to 24 hours before your appointment time through the booking portal.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>What if I need to cancel?</h3>
+                <p>Cancellations can be made up to 12 hours before the appointment without any charges.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Do you accept insurance?</h3>
+                <p>We accept most major health insurance plans. Please bring your insurance card to the appointment.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Leave a Review</h2>
+            <form onsubmit="submitReview(event)">
+                <div class="rating-section">
+                    <label>Your Rating:</label>
+                    <div class="star-rating">
+                        <span class="star" data-value="1">☆</span>
+                        <span class="star" data-value="2">☆</span>
+                        <span class="star" data-value="3">☆</span>
+                        <span class="star" data-value="4">☆</span>
+                        <span class="star" data-value="5">☆</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reviewerName">Your Name:</label>
+                    <input type="text" id="reviewerName" placeholder="Enter your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reviewComment">Your Review:</label>
+                    <textarea id="reviewComment" placeholder="Share your experience..." rows="4" required></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="submit-btn">
+                        Submit Review
+                    </button>
+                    <button type="button" onclick="closeReviewModal()" class="cancel-btn">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Share Doctor Details</h2>
+            <div class="share-options">
+                <button onclick="shareViaWhatsApp()" class="share-btn whatsapp">
+                    WhatsApp
+                </button>
+                <button onclick="copyShareLink()" class="share-btn link">
+                    Copy Link
+                </button>
+                <button onclick="shareViaSMS()" class="share-btn sms">
+                    SMS
+                </button>
+            </div>
+            <button onclick="closeShareModal()" class="cancel-btn">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div class="notification-area" id="notificationArea"></div>
+
+    <!-- Screen Reader Announcement -->
+    <div id="screenReaderAnnouncement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script src="doctors-data.js"></script>
+    <script src="analytics.js"></script>
+    <script src="accessibility.js"></script>
+    <script src="doctor.js"></script>
+    
+    <script>
+        // Initialize doctor page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Doctor page loaded");
+            
+            // Check if doctor is selected
+            const doctorId = localStorage.getItem('selectedDoctorId');
+            if (!doctorId) {
+                showNotification("No doctor selected. Redirecting...", "error");
+                setTimeout(() => window.location.href = 'index.html', 2000);
+                return;
+            }
+            
+            // Announce page load
+            announceToScreenReader("Doctor details page loaded");
+            
+            // Track doctor view
+            trackDoctorView(doctorId);
+        });
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'}</strong>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            announceToScreenReader(message);
+        }
+        
+        // Star rating functionality
+        function setupStarRating() {
+            const stars = document.querySelectorAll('.star-rating .star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.getAttribute('data-value'));
+                    document.getElementById('reviewRating').value = rating;
+                    
+                    // Update star display
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.getAttribute('data-value'));
+                        if (starValue <= rating) {
+                            s.textContent = '★';
+                            s.style.color = '#f39c12';
+                        } else {
+                            s.textContent = '☆';
+                            s.style.color = '#ccc';
+                        }
+                    });
+                });
+                
+                // Hover effect
+                star.addEventListener('mouseover', function() {
+                    const hoverRating = parseInt(this.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.getAttribute('data-value'));
+                        if (starValue <= hoverRating) {
+                            s.style.color = '#f39c12';
+                        } else {
+                            s.style.color = '#ccc';
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseout', function() {
+                    const currentRating = parseInt(document.getElementById('reviewRating').value);
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.getAttribute('data-value'));
+                        if (starValue <= currentRating) {
+                            s.style.color = '#f39c12';
+                        } else {
+                            s.style.color = '#ccc';
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Share functionality
+        function shareDoctor() {
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+        
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+        
+        function shareViaWhatsApp() {
+            const doctor = getDoctorById(localStorage.getItem('selectedDoctorId'));
+            if (doctor) {
+                const text = `Check out ${doctor.name} on RuralCare: ${window.location.href}`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                trackEvent('share_whatsapp', { doctorId: doctor.id });
+            }
+            closeShareModal();
+        }
+        
+        function copyShareLink() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showNotification("Link copied to clipboard!", "success");
+                    trackEvent('share_link_copied');
+                })
+                .catch(err => {
+                    console.error('Failed to copy link:', err);
+                    showNotification("Failed to copy link", "error");
+                });
+            closeShareModal();
+        }
+        
+        function shareViaSMS() {
+            const doctor = getDoctorById(localStorage.getItem('selectedDoctorId'));
+            if (doctor) {
+                const text = `Check out Dr. ${doctor.name} - ${doctor.specialization}. Book at: ${window.location.href}`;
+                window.open(`sms:?body=${encodeURIComponent(text)}`, '_blank');
+                trackEvent('share_sms', { doctorId: doctor.id });
+            }
+            closeShareModal();
+        }
+        
+        // Make functions global
+        window.showNotification = showNotification;
+        window.announceToScreenReader = announceToScreenReader;
+        window.trackEvent = trackEvent;
+        window.trackDoctorView = trackDoctorView;
+        window.getDoctorById = getDoctorById;
+        
+        // Initialize star rating when modal opens
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.add-review-btn')) {
+                setTimeout(setupStarRating, 100);
+            }
+        });
+
+        // doctors.html में ये code ADD करें
+document.addEventListener('DOMContentLoaded', function() {
+    // Get specialization from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const specialization = urlParams.get('specialization');
+    
+    if (specialization) {
+        // Auto-filter doctors by specialization
+        document.getElementById('specializationFilter').value = specialization;
+        filterDoctors();
+        
+        // Show message
+        showNotification(`Showing ${specialization} specialists as recommended by AI`, 'info');
+    }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About & Contact - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Page Styling */
+        .page-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Tabs Styling */
+        .tabs-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .tabs-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* About Section */
+        .about-section {
+            margin-bottom: 40px;
+        }
+        
+        .about-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        /* Contact Section */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .contact-info {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .contact-details {
+            margin-top: 25px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .contact-icon {
+            background: #3498db;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #219653;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #3498db;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        /* Map */
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 25px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .static-map {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button onclick="window.location.href='index.html'" class="back-btn">
+            ← Back to Home
+        </button>
+        <h1>About & Contact</h1>
+    </header>
+
+    <main class="page-content">
+        <div class="tabs-container">
+            <!-- Tabs Header -->
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('about')">
+                    <span>ℹ️</span> About Us
+                </button>
+                <button class="tab-btn" onclick="switchTab('contact')">
+                    <span>📞</span> Contact Us
+                </button>
+            </div>
+            
+            <!-- About Tab Content -->
+            <div id="about-tab" class="tab-content active">
+                <div class="about-section">
+                    <h2>🏥 About RuralCare</h2>
+                    <p>RuralCare is a digital healthcare platform designed specifically for rural areas, connecting patients with doctors through an easy-to-use appointment system.</p>
+                    <p>Our mission is to make quality healthcare accessible to everyone, regardless of their location.</p>
+                </div>
+                
+                <div class="about-section">
+                    <h2>✨ Our Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div>👨‍⚕️</div>
+                            <h3>Doctor Booking</h3>
+                            <p>Find and book appointments with verified doctors in your area.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div>💊</div>
+                            <h3>Medicine Delivery</h3>
+                            <p>Get prescribed medicines delivered to your doorstep.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div>🚨</div>
+                            <h3>Emergency SOS</h3>
+                            <p>Quick access to emergency services and nearby hospitals.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div>📱</div>
+                            <h3>Offline Access</h3>
+                            <p>Works even with poor internet connectivity in rural areas.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-section">
+                    <h2>🎯 Our Vision</h2>
+                    <p>To become India's leading rural healthcare platform, serving 10,000+ villages by 2025.</p>
+                </div>
+            </div>
+            
+            <!-- Contact Tab Content -->
+            <div id="contact-tab" class="tab-content">
+                <div class="contact-container">
+                    <!-- Contact Information -->
+                    <div class="contact-info">
+                        <h2 style="color: #2c3e50; margin-bottom: 25px;">📞 Get In Touch</h2>
+                        
+                        <div class="contact-details">
+                            <!-- Phone -->
+                            <div class="contact-item">
+                                <div class="contact-icon">📱</div>
+                                <div>
+                                    <h3 style="color: #2c3e50; margin-bottom: 5px;">Phone Numbers</h3>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>General Helpline:</strong> +91 9879331257
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Emergency:</strong> 108 / 102
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Technical Support:</strong> +91 9879331257
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="contact-item">
+                                <div class="contact-icon">✉️</div>
+                                <div>
+                                    <h3 style="color: #2c3e50; margin-bottom: 5px;">Email Addresses</h3>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Support:</strong> akashkalsariya@gmail.com
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Partnerships:</strong> akashkalsariya@gmail.com
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Careers:</strong> akashkalsariya@gmail.com
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Address -->
+                            <div class="contact-item">
+                                <div class="contact-icon">🏢</div>
+                                <div>
+                                    <h3 style="color: #2c3e50; margin-bottom: 5px;">Office Address</h3>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        Akash Kalsariya<br>
+                                        RuralCare Healthcare Services<br>
+                                        Gujarat, India
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Hours -->
+                            <div class="contact-item">
+                                <div class="contact-icon">⏰</div>
+                                <div>
+                                    <h3 style="color: #2c3e50; margin-bottom: 5px;">Working Hours</h3>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Saturday:</strong> 9:00 AM - 2:00 PM
+                                    </p>
+                                    <p style="color: #666; margin: 5px 0;">
+                                        <strong>Sunday:</strong> Emergency Services Only
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Links -->
+                        <div class="social-links">
+                            <a href="#" class="social-icon">📘</a>
+                            <a href="#" class="social-icon">📷</a>
+                            <a href="#" class="social-icon">🐦</a>
+                            <a href="#" class="social-icon">💼</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Form -->
+                    <div class="contact-form">
+                        <h2 style="color: #2c3e50; margin-bottom: 25px;">📝 Send Message</h2>
+                        
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="name">Your Name *</label>
+                                <input type="text" id="name" placeholder="Enter your name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" placeholder="Enter your phone number" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" placeholder="Enter your email">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" placeholder="What is this regarding?">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="message">Message *</label>
+                                <textarea id="message" rows="5" placeholder="Type your message here..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Map -->
+                <div class="map-container">
+                    <div class="static-map">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">🗺️</div>
+                        <h3>Our Location</h3>
+                        <p>Akash Kalsariya - RuralCare</p>
+                        <p>Gujarat, India</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab Switching Function
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Activate selected button
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Contact Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            // Here you would normally send data to server
+            // For now, we'll just show an alert
+            alert('Thank you for your message! We will contact you soon.');
+            this.reset();
+            
+            console.log('Form submitted:', formData);
+        });
+        
+        // Auto-switch to contact tab if URL has #contact
+        window.addEventListener('load', function() {
+            if (window.location.hash === '#contact') {
+                switchTab('contact');
+            }
+        });
+    </script>
+</body>
+</html>

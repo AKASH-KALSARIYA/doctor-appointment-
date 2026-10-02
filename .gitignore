@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Build output
+dist/
+build/
+out/
+.next/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# API keys
+firebase-config.js
+config.js
+secrets.js
+
+# Service worker cache
+sw.js.map
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Package lock
+package-lock.json
+yarn.lock
+
+# Editor
+.editorconfig

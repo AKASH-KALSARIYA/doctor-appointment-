@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuralCare - Doctor Appointment System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+</head>
+
+<body>
+    
+    <header>
+    <div class="branding">
+        <img src="do logo.jpg" alt="RuralCare Logo" class="site-logo">
+        <h1 id="title" style="all: unset !important; display: inline-block !important; margin: 0 !important; font-size: 1.8rem !important; font-weight: bold !important;">
+            <span style="color: #2e7d32 !important; font-weight: bold !important;">RuralCare -</span>
+            <span style="color: #1565c0 !important; font-weight: bold !important;"> Doctor</span>
+            <span style="color: #d32f2f !important; font-weight: bold !important;"> Appointment</span>
+            <span style="color: #ff9800 !important; font-weight: bold !important;"> System</span>
+        </h1>
+    </div>
+    
+    
+        
+        <div class="header-controls">
+            <select id="language">
+                <option value="en">English</option>
+                <option value="hi">हिंदी</option>
+            </select>
+            
+            <input type="text" id="search" placeholder="Search Doctor...">
+            
+            <button onclick="window.location.href='admin.html'" class="admin-btn">Admin</button>
+        </div>
+        
+        <div class="accessibility-controls">
+            <button onclick="toggleHighContrast()" title="High Contrast">👁️</button>
+            <button onclick="adjustTextSize('large')" title="Increase Text">A+</button>
+            <button onclick="adjustTextSize('medium')" title="Normal Text">A</button>
+            <button onclick="startVoiceCommands()" title="Voice Commands">🎤</button>
+        </div>
+    </header>
+<nav class="main-nav">
+    <div class="nav-items">
+        <button class="nav-btn" onclick="window.location.href='index.html'">
+            <span>🏠</span>
+            <small>Home</small>
+        </button>
+        <button class="nav-btn" onclick="showDoctors()">
+            <span>👨‍⚕️</span>
+            <small>Doctors</small>
+        </button>
+        <button class="nav-btn" onclick="openMedicineDelivery()">
+            <span>💊</span>
+            <small>Medicines</small>
+        </button>
+        <button class="nav-btn" onclick="openEmergencySOS()">
+            <span>🚨</span>
+            <small>SOS</small>
+        </button>
+        <button class="nav-btn" onclick="window.location.href='appointments.html'">
+            <span>📅</span>
+            <small>Appts</small>
+        </button>
+         <button class="nav-btn" onclick="window.location.href='bluecall.html'">
+            <span>📞</span>
+            <small>Calls</small>
+        </button>
+        <button class="icon-btn ai-btn" title="AI Health Assistant" onclick="openAIAssistant()">
+        <i class="fas fa-robot"></i>
+        <small>Ai voice</small>
+
+    </button>
+        <button class="nav-btn" onclick="toggleMoreMenu()">
+            <span>⋮</span>
+            <small>More</small>
+        </button>
+         
+    
+</div>
+    </div>
+</nav>
+
+<!-- Panels -->
+<div id="medicinePanel" class="floating-panel"></div>
+<div id="moreMenu" class="floating-menu">
+    <div class="menu-content">
+        <button onclick="openHealthTips()">💡 Health Tips</button>
+        <button onclick="openFirstAid()">🩹 First Aid Guide</button>
+        <button onclick="openVaccination()">💉 Vaccination</button>
+        <button onclick="openBloodBank()">🩸 Blood Bank</button>
+        <button onclick="openFeedback()">📝 Feedback</button>
+        <button onclick="openSettings()">⚙️ Settings</button>
+    </div>
+</div>
+
+
+
+    <main id="main-content">
+        <div class="stats-bar">
+            <span id="online-status">🟢 Online</span>
+            <span id="doctor-count">Doctors: 0</span>
+            <button onclick="showAnalytics()">📊 Analytics</button>
+        </div>
+        
+        <div id="doctorList" class="grid"></div>
+        
+        <!-- Analytics Dashboard (Hidden by default) -->
+        <div id="analyticsDashboard" class="analytics-dashboard" style="display:none;">
+            <div class="analytics-card">
+                <h3>📈 Usage Statistics</h3>
+                <div id="statsChart"></div>
+            </div>
+            <div class="analytics-card">
+                <h3>👨‍⚕️ Top Doctors</h3>
+                <div id="topDoctors"></div>
+            </div>
+            <button onclick="hideAnalytics()">Close Analytics</button>
+        </div>
+    </main>
+
+    <div class="notification-area" id="notificationArea"></div>
+    
+    <div class="offline-notification" id="offlineNotification" style="display:none;">
+        ⚠️ You are offline. Changes will be saved locally.
+    </div>
+
+    <!-- Screen Reader Announcement Area -->
+    <div id="screenReaderAnnouncement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- आपके मौजूदा कोड के अंदर कहीं भी -->
+
+<!-- DOCTOR BOOKING BUTTON -->
+<div class="doctor-booking-section" style="margin: 30px 0; text-align: center;">
+    <h2 style="color: #1a237e; margin-bottom: 20px;">
+        <i class="fas fa-stethoscope"></i> लाइव डॉक्टर बुकिंग
+    </h2>
+    
+    <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <!-- BUTTON 1: OPEN LIVE DOCTORS -->
+        <a href="live-doctors.html" 
+           style="text-decoration: none;"
+           target="_blank">
+            <button style="padding: 18px 35px; background: linear-gradient(to right, #00b09b, #96c93d); 
+                    color: white; border: none; border-radius: 15px; font-size: 1.1rem; 
+                    font-weight: bold; cursor: pointer; display: flex; align-items: center; 
+                    gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: all 0.3s;">
+                <i class="fas fa-search-location"></i>
+                लाइव डॉक्टर ढूंढें
+            </button>
+        </a>
+        
+        <!-- BUTTON 2: EMERGENCY -->
+        <button onclick="openSOSModal()" 
+                style="padding: 18px 35px; background: linear-gradient(to right, #ff6b6b, #ff4757); 
+                        color: white; border: none; border-radius: 15px; font-size: 1.1rem; 
+                        font-weight: bold; cursor: pointer; display: flex; align-items: center; 
+                        gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: all 0.3s;">
+            <i class="fas fa-ambulance"></i>
+            इमरजेंसी डॉक्टर
+        </button>
+    </div>
+    
+    <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> पिनकोड डालकर निकटतम डॉक्टर खोजें और अपॉइंटमेंट बुक करें
+    </p>
+</div>
+
+<!-- SOS MODAL (Optional) -->
+<div id="sosModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                          background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; 
+                          justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2 style="color: #ff4757; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-ambulance"></i> इमरजेंसी ऑप्शन्स
+            </h2>
+            <button onclick="closeSOSModal()" 
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">
+                &times;
+            </button>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <a href="live-doctors.html" target="_blank" style="text-decoration: none;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 15px; 
+                            border: 2px solid #e0e0e0; transition: all 0.3s; cursor: pointer;">
+                    <h3 style="color: #1a237e; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-search-location"></i> निकटतम डॉक्टर ढूंढें
+                    </h3>
+                    <p style="color: #666; margin: 0;">पिनकोड से आपके एरिया के डॉक्टर्स</p>
+                </div>
+            </a>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 15px; 
+                        border: 2px solid #e0e0e0;">
+                <h3 style="color: #ff4757; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-phone-alt"></i> इमरजेंसी हेल्पलाइन
+                </h3>
+                <p style="color: #666; margin: 0 0 10px 0;">108 - एम्बुलेंस</p>
+                <p style="color: #666; margin: 0;">102 - मातृत्व एम्बुलेंस</p>
+            </div>
+        </div>
+        
+        <button onclick="closeSOSModal()" 
+                style="width: 100%; padding: 15px; background: #1a237e; color: white; 
+                       border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; 
+                       cursor: pointer;">
+            बंद करें
+        </button>
+    </div>
+</div>
+
+<script>
+    function openSOSModal() {
+        document.getElementById('sosModal').style.display = 'flex';
+    }
+    
+    function closeSOSModal() {
+        document.getElementById('sosModal').style.display = 'none';
+    }
+    
+    // Close modal on outside click
+    document.getElementById('sosModal').addEventListener('click', function(e) {
+        if (e.target.id === 'sosModal') {
+            closeSOSModal();
+        }
+    });
+    function openAIAssistant() {
+        console.log("Opening AI Assistant...");
+        
+        let popup = document.getElementById('aiPopup');
+        
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'aiPopup';
+            popup.innerHTML = `
+                <button class="close-ai" onclick="closeAIAssistant()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <iframe src="ai-assistant.html" 
+                        title="RuralCare AI Assistant" 
+                        allow="microphone">
+                </iframe>
+            `;
+            document.body.appendChild(popup);
+            
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    closeAIAssistant();
+                }
+            });
+        }
+        
+        popup.style.display = 'flex';
+        setTimeout(() => {
+            popup.style.opacity = '1';
+        }, 10);
+    }
+    
+    function closeAIAssistant() {
+        const popup = document.getElementById('aiPopup');
+        if (popup) {
+            popup.style.opacity = '0';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+    }
+    
+    // Close with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAIAssistant();
+        }
+    });
+</script>
+    <!-- Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script src="doctors-data.js"></script>
+    <script src="analytics.js"></script>
+    <script src="offline.js"></script>
+    <script src="accessibility.js"></script>
+    <script src="notification.js"></script>
+    <script src="emergency-sos.js"></script>
+    <script src="app.js"></script>
+    <script src="doctors-data.js"></script>
+    <script type="module" src="app.js"></script>
+        <script src="navigation.js"></script>
+        <script src="live-doctors.js"></script>
+
+    <!-- Initialize Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+   <footer style="
+    background: white;
+    padding: 30px;
+    margin-top: 40px;
+    border-radius: 15px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    text-align: center;
+">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h3 style="color: #2c3e50; margin-bottom: 20px;">RuralCare - ग्रामीण स्वास्थ्य सेवा</h3>
+        
+        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px;">
+            <a href="terms-of-service.html" 
+               style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                📄 Terms of Service
+            </a>
+            <a href="privacy-policy.html" 
+               style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                🔒 Privacy Policy
+            </a>
+            <a href="about-contact.html" 
+               style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                ℹ️ About & Contact
+            </a>
+        </div>
+        
+        <p style="color: #7f8c8d; font-size: 0.9rem; margin: 0;">
+            © 2026 RuralCare Doctor Appointment System. All rights reserved.
+        </p>
+        <p style="color: red; font-size: 0.8rem; margin-top: 10px;">
+            Designed for rural healthcare accessibility
+        </p>
+    </div>
+</footer>
+<script src="login-integration-3d.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Details - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <button onclick="window.history.back()" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h1 id="doctorTitle">Doctor Details</h1>
+            <button onclick="window.location.href='index.html'" class="home-btn">
+                <i class="fas fa-home"></i> Home
+            </button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Doctor Profile -->
+        <div class="doctor-profile">
+            <div class="profile-header">
+                <div class="doctor-avatar" id="doctorAvatar">
+                    <!-- Avatar will be generated from initials -->
+                </div>
+                <div class="doctor-info">
+                    <h1 id="doctorName">Loading...</h1>
+                    <p class="specialization" id="doctorSpecialization"></p>
+                    <p class="qualification" id="doctorQualification"></p>
+                    
+                    <div class="doctor-stats">
+                        <div class="stat">
+                            <i class="fas fa-b

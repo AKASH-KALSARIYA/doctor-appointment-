@@ -1,0 +1,31 @@
+# RuralCare Doctor Appointment System - robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /firebase-config.js
+Disallow: /config.js
+
+Sitemap: https://ruralcare.example.com/sitemap.xml
+
+# Crawl-delay for search engines
+Crawl-delay: 10
+
+# Disallow specific patterns
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /private/
+Disallow: /temp/
+
+# Allow specific user agents
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin

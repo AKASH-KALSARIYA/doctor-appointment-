@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Confirmed - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <header>
+        <button onclick="window.location.href='index.html'" class="home-btn">
+            🏠 Home
+        </button>
+        
+        <h1>Appointment Confirmed</h1>
+        
+        <button onclick="printPage()" class="print-btn">
+            🖨️ Print
+        </button>
+    </header>
+
+    <main id="main-content">
+        <!-- Confirmation Header -->
+        <div class="confirmation-header">
+            <div class="confirmation-icon success">✅</div>
+            <h2>Your Appointment is Confirmed!</h2>
+            <p class="confirmation-subtitle">Thank you for choosing RuralCare</p>
+        </div>
+
+        <!-- Confirmation Details -->
+        <div id="confirmationContainer" class="confirmation-container">
+            <!-- Content will be loaded dynamically -->
+            <div class="loading">
+                Loading appointment details...
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="next-steps">
+            <h3>📋 What's Next?</h3>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>Save Your Booking</h4>
+                    <p>Save the booking details or take a screenshot for reference.</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>Set Reminder</h4>
+                    <p>You'll receive a reminder SMS 24 hours before your appointment.</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>Prepare for Visit</h4>
+                    <p>Bring your ID and any previous medical records.</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h4>Arrive Early</h4>
+                    <p>Please arrive 15 minutes before your scheduled time.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contacts -->
+        <div class="emergency-contacts">
+            <h3>🆘 Emergency Contacts</h3>
+            <div class="contacts-grid">
+                <div class="contact-card emergency">
+                    <h4>Medical Emergency</h4>
+                    <p class="phone">📞 108</p>
+                    <p>24x7 Ambulance Service</p>
+                </div>
+                
+                <div class="contact-card">
+                    <h4>RuralCare Support</h4>
+                    <p class="phone">📞 +91 9879331257</p>
+                    <p>Mon-Sat, 9AM-6PM</p>
+                </div>
+                
+                <div class="contact-card">
+                    <h4>Clinic Contact</h4>
+                    <p id="clinicPhone" class="phone">📞 Loading...</p>
+                    <p id="clinicTimings">Timings loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="confirmation-actions">
+            <button onclick="downloadReceipt()" class="action-btn download">
+                📄 Download Receipt
+            </button>
+            
+            <button onclick="shareAppointment()" class="action-btn share">
+                📱 Share Details
+            </button>
+            
+            <button onclick="addToCalendar()" class="action-btn calendar">
+                📅 Add to Calendar
+            </button>
+            
+            <button onclick="bookAnother()" class="action-btn another">
+                🏥 Book Another
+            </button>
+            
+            <button onclick="cancelAppointment()" class="action-btn cancel">
+                ❌ Cancel Appointment
+            </button>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback-section">
+            <h3>💬 How was your booking experience?</h3>
+            <div class="rating-buttons">
+                <button class="rating-btn poor" onclick="submitFeedback(1)">
+                    😞 Poor
+                </button>
+                <button class="rating-btn fair" onclick="submitFeedback(2)">
+                    😐 Fair
+                </button>
+                <button class="rating-btn good" onclick="submitFeedback(3)">
+                    🙂 Good
+                </button>
+                <button class="rating-btn excellent" onclick="submitFeedback(4)">
+                    😊 Excellent
+                </button>
+                <button class="rating-btn amazing" onclick="submitFeedback(5)">
+                    🤩 Amazing
+                </button>
+            </div>
+            
+            <div class="feedback-form" id="feedbackForm" style="display: none;">
+                <textarea id="feedbackComment" placeholder="Share your feedback (optional)..." rows="3"></textarea>
+                <button onclick="saveFeedback()" class="submit-feedback">
+                    Submit Feedback
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cancel Modal -->
+    <div id="cancelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Cancel Appointment</h2>
+            <div class="cancel-reasons">
+                <label>
+                    <input type="radio" name="cancelReason" value="changed-mind">
+                    Changed my mind
+                </label>
+                <label>
+                    <input type="radio" name="cancelReason" value="found-other-doctor">
+                    Found another doctor
+                </label>
+                <label>
+                    <input type="radio" name="cancelReason" value="emergency">
+                    Emergency situation
+                </label>
+                <label>
+                    <input type="radio" name="cancelReason" value="schedule-conflict">
+                    Schedule conflict
+                </label>
+                <label>
+                    <input type="radio" name="cancelReason" value="other">
+                    Other reason
+                </label>
+                
+                <textarea id="cancelReasonOther" placeholder="Please specify..." rows="2" style="display: none; margin-top: 10px;"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="confirmCancellation()" class="confirm-cancel">
+                    Confirm Cancellation
+                </button>
+                <button onclick="closeCancelModal()" class="cancel-btn">
+                    Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div class="notification-area" id="notificationArea"></div>
+
+    <!-- Screen Reader Announcement -->
+    <div id="screenReaderAnnouncement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scripts -->
+    <script src="doctors-data.js"></script>
+    <script src="analytics.js"></script>
+    <script src="confirmation.js"></script>
+    
+    <script>
+        // Initialize confirmation page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Confirmation page loaded");
+            
+            // Load appointment details
+            loadAppointmentDetails();
+            
+            // Setup cancel reason listener
+            setupCancelReasons();
+            
+            // Announce page load
+            announceToScreenReader("Appointment confirmation page loaded");
+            
+            // Track confirmation page view
+            trackEvent('confirmation_page_viewed');
+        });
+        
+        function loadAppointmentDetails() {
+            const appointment = JSON.parse(localStorage.getItem('lastBooking'));
+            
+            if (!appointment) {
+                showNotification("No appointment found. Redirecting to home...", "error");
+                setTimeout(() => window.location.href = 'index.html', 3000);
+                return;
+            }
+            
+            // Format date
+            const appointmentDate = new Date(appointment.appointmentDate);
+            const formattedDate = appointmentDate.toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Get doctor details
+            const doctor = getDoctorById(appointment.doctorId) || {
+                name: appointment.doctorName,
+                specialization: appointment.doctorSpecialization,
+                contact: 'Not provided',
+                location: 'Rural Health Center',
+                fees: appointment.fees
+            };
+            
+            // Update clinic contact
+            document.getElementById('clinicPhone').textContent = `📞 ${doctor.contact || 'Not provided'}`;
+            document.getElementById('clinicTimings').textContent = doctor.availability || 'Mon-Fri, 9AM-5PM';
+            
+            // Display confirmation details
+            const container = document.getElementById('confirmationContainer');
+            container.innerHTML = `
+                <div class="booking-summary">
+                    <div class="summary-section">
+                        <h3>📋 Booking Summary</h3>
+                        <div class="summary-row">
+                            <span class="label">Booking ID:</span>
+                            <span class="value highlight">${appointment.bookingId || 'N/A'}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Booking Date:</span>
+                            <span class="value">${new Date(appointment.bookingTime).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3>👨‍⚕️ Doctor Details</h3>
+                        <div class="summary-row">
+                            <span class="label">Doctor:</span>
+                            <span class="value">Dr. ${appointment.doctorName}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Specialization:</span>
+                            <span class="value">${appointment.doctorSpecialization}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Consultation Fee:</span>
+                            <span class="value">₹${appointment.fees}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3>👤 Patient Details</h3>
+                        <div class="summary-row">
+                            <span class="label">Patient Name:</span>
+                            <span class="value">${appointment.patientName}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Age & Gender:</span>
+                            <span class="value">${appointment.patientAge} years, ${appointment.gender}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Contact:</span>
+                            <span class="value">${appointment.phone}</span>
+                        </div>
+                        ${appointment.email ? `
+                        <div class="summary-row">
+                            <span class="label">Email:</span>
+                            <span class="value">${appointment.email}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3>📅 Appointment Details</h3>
+                        <div class="summary-row">
+                            <span class="label">Date:</span>
+                            <span class="value">${formattedDate}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Time:</span>
+                            <span class="value">${appointment.appointmentTime}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Duration:</span>
+                            <span class="value">15-20 minutes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3>📍 Clinic Location</h3>
+                        <div class="summary-row">
+                            <span class="label">Address:</span>
+                            <span class="value">${doctor.location}</span>
+                        </div>
+                        <button onclick="getDirections()" class="directions-btn">
+                            🗺️ Get Directions
+                        </button>
+                    </div>
+                    
+                    ${appointment.symptoms ? `
+                    <div class="summary-section">
+                        <h3>💊 Medical Information</h3>
+                        <div class="summary-row">
+                            <span class="label">Symptoms:</span>
+                            <span class="value">${appointment.symptoms}</span>
+                        </div>
+                        ${appointment.previousHistory ? `
+                        <div class="summary-row">
+                            <span class="label">Medical History:</span>
+                            <span class="value">${appointment.previousHistory}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Store appointment for later use
+            window.currentAppointment = appointment;
+        }
+        
+        function setupCancelReasons() {
+            const otherRadio = document.querySelector('input[value="other"]');
+            const otherTextarea = document.getElementById('cancelReasonOther');
+            
+            document.querySelectorAll('input[name="cancelReason"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'other') {
+                        otherTextarea.style.display = 'block';
+                        otherTextarea.required = true;
+                    } else {
+                        otherTextarea.style.display = 'none';
+                        otherTextarea.required = false;
+                    }
+                });
+            });
+        }
+        
+        function printPage() {
+            window.print();
+            trackEvent('confirmation_printed');
+        }
+        
+        function downloadReceipt() {
+            showNotification("Receipt download feature will be available soon", "info");
+            trackEvent('receipt_download_clicked');
+        }
+        
+        function shareAppointment() {
+            if (navigator.share) {
+                const appointment = JSON.parse(localStorage.getItem('lastBooking'));
+                navigator.share({
+                    title: 'My Doctor Appointment',
+                    text: `I have an appointment with Dr. ${appointment.doctorName} on ${appointment.appointmentDate} at ${appointment.appointmentTime}. Booking ID: ${appointment.bookingId}`,
+                    url: window.location.href
+                }).then(() => {
+                    trackEvent('appointment_shared_native');
+                });
+            } else {
+                // Fallback: copy to clipboard
+                const appointment = JSON.parse(localStorage.getItem('lastBooking'));
+                const text = `Appointment with Dr. ${appointment.doctorName} on ${appointment.appointmentDate} at ${appointment.appointmentTime}. Booking ID: ${appointment.bookingId}`;
+                
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        showNotification("Appointment details copied to clipboard!", "success");
+                        trackEvent('appointment_copied');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy:', err);
+                        showNotification("Failed to copy details", "error");
+                    });
+            }
+        }
+        
+        function addToCalendar() {
+            showNotification("Calendar integration coming soon", "info");
+            trackEvent('calendar_add_clicked');
+        }
+        
+        function bookAnother() {
+            localStorage.removeItem('selectedDoctorId');
+            window.location.href = 'index.html';
+            trackEvent('book_another_clicked');
+        }
+        
+        function cancelAppointment() {
+            document.getElementById('cancelModal').style.display = 'flex';
+            trackEvent('cancel_initiated');
+        }
+        
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+        
+        function confirmCancellation() {
+            const selectedReason = document.querySelector('input[name="cancelReason"]:checked');
+            
+            if (!selectedReason) {
+                showNotification("Please select a cancellation reason", "error");
+                return;
+            }
+            
+            let reason = selectedReason.value;
+            if (reason === 'other') {
+                const otherReason = document.getElementById('cancelReasonOther').value.trim();
+                if (!otherReason) {
+                    showNotification("Please specify the cancellation reason", "error");
+                    return;
+                }
+                reason = otherReason;
+            }
+            
+            // Here you would typically call an API to cancel the appointment
+            // For now, we'll just show a success message
+            
+            showNotification("Appointment cancelled successfully", "success");
+            closeCancelModal();
+            
+            // Track cancellation
+            trackEvent('appointment_cancelled', { reason: reason });
+            
+            // Redirect to home after delay
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+        
+        function getDirections() {
+            const appointment = JSON.parse(localStorage.getItem('lastBooking'));
+            const doctor = getDoctorById(appointment.doctorId);
+            const address = encodeURIComponent(doctor?.location || 'Rural Health Center');
+            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+            trackEvent('get_directions_from_confirmation');
+        }
+        
+        function submitFeedback(rating) {
+            const feedbackForm = document.getElementById('feedbackForm');
+            feedbackForm.style.display = 'block';
+            feedbackForm.scrollIntoView({ behavior: 'smooth' });
+            window.currentFeedbackRating = rating;
+            
+            // Highlight selected rating
+            document.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            trackEvent('feedback_rating_selected', { rating: rating });
+        }
+        
+        function saveFeedback() {
+            const comment = document.getElementById('feedbackComment').value.trim();
+            const rating = window.currentFeedbackRating;
+            
+            if (!rating) {
+                showNotification("Please select a rating first", "error");
+                return;
+            }
+            
+            // Save feedback
+            const feedback = {
+                rating: rating,
+                comment: comment,
+                timestamp: new Date().toISOString(),
+                page: 'confirmation'
+            };
+            
+            const allFeedback = JSON.parse(localStorage.getItem('feedback') || '[]');
+            allFeedback.push(feedback);
+            localStorage.setItem('feedback', JSON.stringify(allFeedback));
+            
+            showNotification("Thank you for your feedback!", "success");
+            document.getElementById('feedbackForm').style.display = 'none';
+            document.getElementById('feedbackComment').value = '';
+            
+            // Track feedback submission
+            trackEvent('feedback_submitted', { rating: rating });
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'}</strong>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            announceToScreenReader(message);
+        }
+        
+        // Make functions global
+        window.announceToScreenReader = announceToScreenReader;
+        window.trackEvent = trackEvent;
+        window.getDoctorById = getDoctorById;
+    </script>
+</body>
+</html>

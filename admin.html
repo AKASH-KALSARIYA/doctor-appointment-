@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <header>
+        <h1>RuralCare Admin Panel</h1>
+        
+        <div class="header-controls">
+            <button onclick="window.location.href='index.html'" class="home-btn">
+                🏠 Home
+            </button>
+            
+            <button onclick="exportData()" class="export-btn">
+                📤 Export Data
+            </button>
+            
+            <button onclick="importData()" class="import-btn">
+                📥 Import Data
+            </button>
+            
+            <button onclick="logout()" class="logout-btn">
+                🔒 Logout
+            </button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Admin Login (shown if not authenticated) -->
+        <div id="adminLogin" class="login-container" style="display: none;">
+            <div class="login-box">
+                <h2>Admin Login</h2>
+                <input type="password" id="adminPassword" placeholder="Enter Admin Password">
+                <button onclick="adminLogin()">Login</button>
+                <p class="hint">Hint: Default password is "admin123"</p>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard (shown after authentication) -->
+        <div id="adminDashboard" style="display: none;">
+            <!-- Statistics Overview -->
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <h3>👨‍⚕️ Total Doctors</h3>
+                    <p id="totalDoctors" class="stat-number">0</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>📅 Total Appointments</h3>
+                    <p id="totalAppointments" class="stat-number">0</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>⭐ Average Rating</h3>
+                    <p id="avgRating" class="stat-number">0.0</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>📊 Offline Actions</h3>
+                    <p id="offlineActions" class="stat-number">0</p>
+                </div>
+            </div>
+
+            <!-- Add Doctor Form -->
+            <!-- Add this inside admin.html, replace the existing "Add New Doctor" section -->
+
+<div class="admin-section">
+    <h2>➕ Add New Doctor</h2>
+    <form id="addDoctorForm" class="doctor-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="doctorName">Doctor Name *</label>
+                <input type="text" id="doctorName" name="name" placeholder="Dr. Full Name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="specialization">Specialization *</label>
+                <select id="specialization" name="specialization" required>
+                    <option value="">Select Specialization</option>
+                    <option value="General Physician">General Physician</option>
+                    <option value="Gynecologist">Gynecologist</option>
+                    <option value="Pediatrician">Pediatrician</option>
+                    <option value="Dentist">Dentist</option>
+                    <option value="Orthopedic">Orthopedic</option>
+                    <option value="Ayurveda">Ayurveda</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Dermatologist">Dermatologist</option>
+                    <option value="Psychiatrist">Psychiatrist</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="qualification">Qualification</label>
+                <input type="text" id="qualification" name="qualification" placeholder="MBBS, MD, etc.">
+            </div>
+            
+            <div class="form-group">
+                <label for="experience">Years of Experience</label>
+                <input type="number" id="experience" name="experience" placeholder="5" min="0" max="50">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fees">Consultation Fees (₹) *</label>
+                <input type="number" id="fees" name="fees" placeholder="300" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="availability">Availability</label>
+                <input type="text" id="availability" name="availability" placeholder="Mon-Fri, 9AM-5PM">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact">Contact Number</label>
+                <input type="tel" id="contact" name="contact" placeholder="+91XXXXXXXXXX">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="doctor@example.com">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="location">Clinic Location</label>
+                <input type="text" id="location" name="location" placeholder="Rural Health Center, Village">
+            </div>
+            
+            <div class="form-group">
+                <label for="languages">Languages (comma separated)</label>
+                <input type="text" id="languages" name="languages" placeholder="Hindi, English, Local">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="doctorImage">Doctor Photo (Optional)</label>
+            <input type="file" id="doctorImage" name="image" accept="image/*">
+            <small>Max size: 5MB. Supported formats: JPG, PNG</small>
+            <div id="imagePreview" class="image-preview"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="bio">Bio / Description</label>
+            <textarea id="bio" name="bio" placeholder="About the doctor, experience, specializations..." rows="3"></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" id="addDoctorBtn" class="submit-btn">
+                Add Doctor
+            </button>
+            <button type="reset" class="reset-btn">
+                Clear Form
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Updated Edit Modal -->
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Edit Doctor</h2>
+        <form id="editDoctorForm">
+            <input type="hidden" id="editDoctorId" name="doctorId">
+            <input type="hidden" id="existingImageUrl" name="existingImageUrl">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editName">Doctor Name *</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editSpecialization">Specialization *</label>
+                    <input type="text" id="editSpecialization" name="specialization" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editQualification">Qualification</label>
+                    <input type="text" id="editQualification" name="qualification">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExperience">Experience (years)</label>
+                    <input type="number" id="editExperience" name="experience" min="0">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editFees">Fees (₹)</label>
+                    <input type="number" id="editFees" name="fees" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAvailability">Availability</label>
+                    <input type="text" id="editAvailability" name="availability">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editContact">Contact</label>
+                    <input type="tel" id="editContact" name="contact">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="email">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editLocation">Location</label>
+                    <input type="text" id="editLocation" name="location">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLanguages">Languages</label>
+                    <input type="text" id="editLanguages" name="languages">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editDoctorImage">Update Photo</label>
+                <input type="file" id="editDoctorImage" name="image" accept="image/*">
+                <small>Leave empty to keep current image</small>
+                <div id="editImagePreview" class="image-preview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editBio">Bio</label>
+                <textarea id="editBio" name="bio" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="submit" id="updateDoctorBtn" class="save-btn">
+                    Save Changes
+                </button>
+                <button type="button" onclick="closeEditModal()" class="cancel-btn">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+                    
+                    <textarea id="bio" placeholder="Bio/Description" rows="3"></textarea>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="addDoctor()" class="submit-btn">
+                            Add Doctor
+                        </button>
+                        <button type="reset" class="reset-btn">
+                            Clear Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Doctors Management -->
+            <div class="admin-section">
+                <h2>👨‍⚕️ Manage Doctors</h2>
+                
+                <div class="search-controls">
+                    <input type="text" id="adminSearch" placeholder="Search doctors..." 
+                           onkeyup="filterDoctors()">
+                    
+                    <select id="sortBy" onchange="sortDoctors()">
+                        <option value="name">Sort by Name</option>
+                        <option value="experience">Sort by Experience</option>
+                        <option value="fees">Sort by Fees</option>
+                        <option value="rating">Sort by Rating</option>
+                    </select>
+                    
+                    <button onclick="refreshDoctors()" class="refresh-btn">
+                        🔄 Refresh
+                    </button>
+                </div>
+                
+                <div class="loading" id="loading" style="display: none;">
+                    Loading doctors...
+                </div>
+                
+                <div class="doctors-table-container">
+                    <table id="doctorsTable" class="doctors-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Fees</th>
+                                <th>Rating</th>
+                                <th>Appointments</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorsTableBody">
+                            <!-- Doctors will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-info">
+                    <p>Showing <span id="doctorCount">0</span> doctors</p>
+                </div>
+            </div>
+
+            <!-- Appointments Management -->
+            <div class="admin-section">
+                <h2>📅 Manage Appointments</h2>
+                
+                <div class="filter-controls">
+                    <select id="appointmentFilter" onchange="filterAppointments()">
+                        <option value="all">All Appointments</option>
+                        <option value="today">Today</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    
+                    <input type="date" id="appointmentDateFilter" onchange="filterByDate()">
+                </div>
+                
+                <div class="appointments-container">
+                    <div id="appointmentsList">
+                        <!-- Appointments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div class="admin-section">
+                <h2>📊 Analytics Dashboard</h2>
+                
+                <div class="analytics-tabs">
+                    <button class="tab-btn active" onclick="showTab('usageTab')">Usage Analytics</button>
+                    <button class="tab-btn" onclick="showTab('doctorTab')">Doctor Analytics</button>
+                    <button class="tab-btn" onclick="showTab('userTab')">User Analytics</button>
+                    <button class="tab-btn" onclick="showTab('revenueTab')">Revenue Analytics</button>
+                </div>
+                
+                <div id="usageTab" class="tab-content active">
+                    <div class="chart-container">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                    <div class="analytics-stats">
+                        <div class="analytics-stat">
+                            <h4>Total Page Views</h4>
+                            <p id="totalViews">0</p>
+                        </div>
+                        <div class="analytics-stat">
+                            <h4>Unique Users</h4>
+                            <p id="uniqueUsers">0</p>
+                        </div>
+                        <div class="analytics-stat">
+                            <h4>Avg Session Time</h4>
+                            <p id="avgSessionTime">0s</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="doctorTab" class="tab-content">
+                    <div class="chart-container">
+                        <canvas id="doctorChart"></canvas>
+                    </div>
+                    <div id="topDoctorsList">
+                        <!-- Top doctors list will be loaded here -->
+                    </div>
+                </div>
+                
+                <div id="userTab" class="tab-content">
+                    <div class="user-stats">
+                        <h4>User Engagement</h4>
+                        <p id="userEngagement">Loading...</p>
+                    </div>
+                </div>
+                
+                <div id="revenueTab" class="tab-content">
+                    <div class="revenue-stats">
+                        <h4>Revenue Overview</h4>
+                        <p id="revenueOverview">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="admin-section">
+                <h2>⚙️ System Settings</h2>
+                
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <h4>Notification Settings</h4>
+                        <label>
+                            <input type="checkbox" id="smsNotifications" checked>
+                            Enable SMS Notifications
+                        </label>
+                        <label>
+                            <input type="checkbox" id="emailNotifications">
+                            Enable Email Notifications
+                        </label>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <h4>Appointment Settings</h4>
+                        <label>
+                            Minimum Booking Advance (hours):
+                            <input type="number" id="minBookingAdvance" value="24" min="1">
+                        </label>
+                        <label>
+                            Maximum Daily Appointments:
+                            <input type="number" id="maxDailyAppointments" value="50" min="1">
+                        </label>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <h4>Maintenance Mode</h4>
+                        <label>
+                            <input type="checkbox" id="maintenanceMode">
+                            Enable Maintenance Mode
+                        </label>
+                        <textarea id="maintenanceMessage" placeholder="Maintenance message..." rows="2"></textarea>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button onclick="saveSettings()" class="save-btn">
+                        💾 Save Settings
+                    </button>
+                    <button onclick="resetSettings()" class="reset-btn">
+                        🔄 Reset to Default
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="admin-section">
+                <h2>🗄️ Data Management</h2>
+                
+                <div class="data-actions">
+                    <button onclick="backupData()" class="backup-btn">
+                        💾 Backup All Data
+                    </button>
+                    <button onclick="clearOldData()" class="clear-btn">
+                        🗑️ Clear Old Data
+                    </button>
+                    <button onclick="syncAllData()" class="sync-btn">
+                        🔄 Sync All Data
+                    </button>
+                </div>
+                
+                <div class="data-info">
+                    <h4>Storage Information</h4>
+                    <p>Local Storage: <span id="localStorageSize">0 KB</span></p>
+                    <p>IndexedDB: <span id="indexedDBSize">0 KB</span></p>
+                    <p>Cache Storage: <span id="cacheSize">0 KB</span></p>
+                </div>
+            </div>
+
+            <!-- Offline Actions Queue -->
+            <div class="admin-section">
+                <h2>🔄 Offline Actions Queue</h2>
+                
+                <div id="offlineQueue">
+                    <!-- Offline actions will be loaded here -->
+                </div>
+                
+                <div class="queue-controls">
+                    <button onclick="processOfflineQueue()" class="process-btn">
+                        Process Queue
+                    </button>
+                    <button onclick="clearCompletedQueue()" class="clear-btn">
+                        Clear Completed
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- ================ NEW FEATURES START ================ -->
+
+<!-- Doctor Verification Dashboard -->
+<div class="admin-section">
+    <h2>✅ Doctor Verification System</h2>
+    
+    <div class="verification-stats">
+        <div class="stat-card">
+            <h4>⏳ Pending Verification</h4>
+            <p id="pendingVerifyCount" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h4>✅ Verified Doctors</h4>
+            <p id="verifiedDoctorCount" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h4>📋 Total Applications</h4>
+            <p id="totalApplications" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h4>📅 This Month</h4>
+            <p id="monthlyApplications" class="stat-number">0</p>
+        </div>
+    </div>
+
+    <div class="verification-controls">
+        <input type="text" id="verifySearch" placeholder="Search by name, specialization..." 
+               onkeyup="filterVerifications()">
+        <select id="verifyStatusFilter" onchange="filterByVerificationStatus()">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+            <option value="documents_pending">Documents Pending</option>
+        </select>
+        <button onclick="refreshVerifications()" class="btn-refresh">🔄 Refresh</button>
+        <button onclick="exportVerificationReport()" class="btn-export">📊 Export Report</button>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Doctor Name</th>
+                    <th>Specialization</th>
+                    <th>Status</th>
+                    <th>Documents</th>
+                    <th>Applied On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="verificationTableBody">
+                <!-- Verification data will load here -->
+                <tr>
+                    <td colspan="6" class="no-data">Loading verification data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="quick-actions">
+        <button onclick="bulkVerifyDoctors()" class="action-btn verify-btn">
+            ✅ Verify Selected
+        </button>
+        <button onclick="requestMoreDocuments()" class="action-btn request-btn">
+            📄 Request Documents
+        </button>
+        <button onclick="scheduleVerificationInterview()" class="action-btn interview-btn">
+            🎥 Schedule Interview
+        </button>
+    </div>
+</div>
+
+<!-- Telemedicine Live Dashboard -->
+<div class="admin-section">
+    <h2>📹 Live Telemedicine Dashboard</h2>
+    
+    <div class="live-stats">
+        <div class="live-stat active">
+            <h4>🔴 Live Now</h4>
+            <p id="activeSessions" class="live-number">0</p>
+        </div>
+        <div class="live-stat">
+            <h4>⏰ Today's Sessions</h4>
+            <p id="todaySessions" class="live-number">0</p>
+        </div>
+        <div class="live-stat">
+            <h4>✅ Completed</h4>
+            <p id="completedSessions" class="live-number">0</p>
+        </div>
+        <div class="live-stat">
+            <h4>📈 Avg Duration</h4>
+            <p id="avgSessionTime" class="live-number">0 min</p>
+        </div>
+    </div>
+
+    <div class="sessions-container">
+        <div class="session-card">
+            <h4>🟢 Active Sessions</h4>
+            <div id="activeSessionsList" class="sessions-list">
+                <p class="no-sessions">No active sessions</p>
+            </div>
+        </div>
+        
+        <div class="session-card">
+            <h4>⏰ Upcoming Sessions</h4>
+            <div id="upcomingSessionsList" class="sessions-list">
+                <p class="no-sessions">No upcoming sessions</p>
+            </div>
+        </div>
+        
+        <div class="session-card">
+            <h4>📊 Session Analytics</h4>
+            <div class="analytics-mini">
+                <canvas id="sessionChart" width="300" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="telemedicine-controls">
+        <button onclick="startNewSession()" class="btn-start">
+            🎬 Start New Session
+        </button>
+        <button onclick="viewAllSessions()" class="btn-view">
+            📋 View All Sessions
+        </button>
+        <button onclick="generateSessionReport()" class="btn-report">
+            📄 Generate Report
+        </button>
+    </div>
+</div>
+
+<!-- Medicine Inventory Management -->
+<div class="admin-section">
+    <h2>💊 Medicine Inventory Management</h2>
+    
+    <div class="inventory-alerts">
+        <div class="alert alert-warning">
+            <strong>⚠️ Low Stock Alert:</strong>
+            <span id="lowStockItems">0 items below minimum stock</span>
+        </div>
+        <div class="alert alert-danger">
+            <strong>⛔ Expiring Soon:</strong>
+            <span id="expiringItems">0 items expiring in 30 days</span>
+        </div>
+        <div class="alert alert-info">
+            <strong>📦 Total Stock Value:</strong>
+            <span id="totalStockValue">₹0</span>
+        </div>
+    </div>
+
+    <div class="inventory-controls">
+        <input type="text" id="medicineSearch" placeholder="Search medicine..." 
+               onkeyup="searchMedicine()">
+        <select id="categoryFilter" onchange="filterByCategory()">
+            <option value="all">All Categories</option>
+            <option value="tablet">Tablets</option>
+            <option value="syrup">Syrup</option>
+            <option value="injection">Injection</option>
+            <option value="ointment">Ointment</option>
+        </select>
+        <button onclick="addNewMedicine()" class="btn-add">➕ Add Medicine</button>
+        <button onclick="importStock()" class="btn-import">📥 Import Stock</button>
+    </div>
+
+    <div class="table-container">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>Medicine Name</th>
+                    <th>Category</th>
+                    <th>Current Stock</th>
+                    <th>Min Stock</th>
+                    <th>Expiry Date</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+                <tr>
+                    <td colspan="8" class="no-data">Loading inventory...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Quick Inventory Actions -->
+    <div class="quick-inventory-actions">
+        <button onclick="generateReorderList()" class="inv-btn reorder-btn">
+            📋 Generate Re-order List
+        </button>
+        <button onclick="printBarcodeLabels()" class="inv-btn barcode-btn">
+            🏷️ Print Barcode Labels
+        </button>
+        <button onclick="exportInventoryReport()" class="inv-btn export-btn">
+            📤 Export Inventory Report
+        </button>
+    </div>
+</div>
+
+<!-- AI Health Insights -->
+<div class="admin-section">
+    <h2>🤖 AI Health Insights & Predictions</h2>
+    
+    <div class="ai-insights">
+        <div class="insight-card">
+            <h4>🩺 Disease Pattern Detection</h4>
+            <div id="diseasePatterns" class="insight-content">
+                <p>Analyzing patient data...</p>
+            </div>
+        </div>
+        
+        <div class="insight-card">
+            <h4>📈 Peak Hour Prediction</h4>
+            <div id="peakHours" class="insight-content">
+                <canvas id="peakHourChart" width="250" height="120"></canvas>
+            </div>
+        </div>
+        
+        <div class="insight-card">
+            <h4>💊 Medicine Demand Forecast</h4>
+            <div id="medicineDemand" class="insight-content">
+                <p>Calculating demand trends...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ai-recommendations">
+        <h4>📋 AI Recommendations</h4>
+        <div id="aiRecommendationsList">
+            <div class="recommendation">
+                <span class="rec-icon">💡</span>
+                <span>Increase stock of Paracetamol by 20%</span>
+            </div>
+            <div class="recommendation">
+                <span class="rec-icon">👨‍⚕️</span>
+                <span>Schedule extra Gynecology OPD on Monday</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offline Data Management -->
+<div class="admin-section">
+    <h2>📱 Offline Data Management</h2>
+    
+    <div class="offline-status">
+        <div class="status-indicator">
+            <span class="status-dot online"></span>
+            <span>Online</span>
+        </div>
+        <div class="sync-info">
+            <span>Last Synced: <span id="lastSyncTime">Just now</span></span>
+        </div>
+    </div>
+
+    <div class="offline-data">
+        <div class="data-card pending">
+            <h4>📥 Pending Sync</h4>
+            <p id="pendingSyncCount">0 items</p>
+            <button onclick="forceSync()" class="btn-sync">🔄 Sync Now</button>
+        </div>
+        
+        <div class="data-card local">
+            <h4>💾 Local Storage</h4>
+            <p id="localStorageSize">0 MB</p>
+            <button onclick="clearLocalCache()" class="btn-clear">🗑️ Clear Cache</button>
+        </div>
+        
+        <div class="data-card backup">
+            <h4>💿 Last Backup</h4>
+            <p id="lastBackupTime">Never</p>
+            <button onclick="createBackup()" class="btn-backup">💾 Backup Now</button>
+        </div>
+    </div>
+
+    <div class="offline-controls">
+        <button onclick="exportForOffline()" class="offline-btn">
+            📲 Export for Offline Use
+        </button>
+        <button onclick="viewSyncLogs()" class="offline-btn">
+            📋 View Sync Logs
+        </button>
+        <button onclick="configureSync()" class="offline-btn">
+            ⚙️ Configure Sync
+        </button>
+    </div>
+</div>
+
+<!-- Emergency Management -->
+<div class="admin-section emergency-section">
+    <h2>🚨 Emergency Management System</h2>
+    
+    <div class="emergency-alert">
+        <div class="alert alert-emergency">
+            <strong>🚨 EMERGENCY MODE</strong>
+            <button onclick="activateEmergencyMode()" class="btn-emergency">
+                ACTIVATE EMERGENCY
+            </button>
+        </div>
+    </div>
+
+    <div class="emergency-contacts">
+        <h4>🆘 Emergency Contacts</h4>
+        <div class="contacts-grid">
+            <div class="contact-card">
+                <h5>🏥 Nearest Hospital</h5>
+                <p id="nearestHospital">Loading...</p>
+                <button onclick="callAmbulance()" class="btn-call">🚑 Call Ambulance</button>
+            </div>
+            <div class="contact-card">
+                <h5>👨‍⚕️ On-call Doctors</h5>
+                <p id="onCallDoctors">0 doctors available</p>
+                <button onclick="contactOnCall()" class="btn-call">📞 Contact Now</button>
+            </div>
+            <div class="contact-card">
+                <h5>📞 Emergency Numbers</h5>
+                <p>108 - Ambulance</p>
+                <p>104 - Health Helpline</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="emergency-history">
+        <h4>📋 Recent Emergencies</h4>
+        <div id="emergencyHistory">
+            <p>No recent emergencies</p>
+        </div>
+    </div>
+</div>
+
+<!-- Government Compliance -->
+<div class="admin-section">
+    <h2>🏛️ Government Compliance</h2>
+    
+    <div class="compliance-status">
+        <div class="compliance-card compliant">
+            <h4>✅ Ayushman Bharat</h4>
+            <p id="ayushmanStatus">Registered</p>
+        </div>
+        <div class="compliance-card">
+            <h4>📋 NABH Compliance</h4>
+            <p id="nabhStatus">Pending</p>
+        </div>
+        <div class="compliance-card">
+            <h4>📅 License Renewal</h4>
+            <p id="licenseRenewal">Due in 45 days</p>
+        </div>
+    </div>
+
+    <div class="compliance-docs">
+        <h4>📄 Required Documents</h4>
+        <div id="requiredDocuments">
+            <!-- Documents list -->
+        </div>
+        <button onclick="uploadComplianceDocs()" class="btn-upload">
+            📎 Upload Documents
+        </button>
+    </div>
+</div>
+<!-- ================ NEW FEATURES END ================ -->
+    </main>
+
+    <!-- Edit Doctor Modal -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Edit Doctor</h2>
+            <form id="editDoctorForm">
+                <input type="hidden" id="editDoctorId">
+                
+                <div class="form-row">
+                    <input type="text" id="editName" placeholder="Doctor Name" required>
+                    <input type="text" id="editSpecialization" placeholder="Specialization" required>
+                </div>
+                
+                <div class="form-row">
+                    <input type="text" id="editQualification" placeholder="Qualification">
+                    <input type="number" id="editExperience" placeholder="Experience (years)">
+                </div>
+                
+                <div class="form-row">
+                    <input type="number" id="editFees" placeholder="Fees">
+                    <input type="tel" id="editContact" placeholder="Contact">
+                </div>
+                
+                <div class="form-row">
+                    <input type="text" id="editAvailability" placeholder="Availability">
+                    <input type="text" id="editLocation" placeholder="Location">
+                </div>
+                
+                <textarea id="editBio" placeholder="Bio" rows="3"></textarea>
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="updateDoctor()" class="save-btn">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="cancel-btn">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Export Data</h2>
+            <div class="export-options">
+                <label>
+                    <input type="radio" name="exportFormat" value="json" checked>
+                    JSON Format
+                </label>
+                <label>
+                    <input type="radio" name="exportFormat" value="csv">
+                    CSV Format
+                </label>
+                <label>
+                    <input type="radio" name="exportFormat" value="excel">
+                    Excel Format
+                </label>
+            </div>
+            
+            <div class="export-data">
+                <label>
+                    <input type="checkbox" id="exportDoctors" checked>
+                    Doctors Data
+                </label>
+                <label>
+                    <input type="checkbox" id="exportAppointments" checked>
+                    Appointments Data
+                </label>
+                <label>
+                    <input type="checkbox" id="exportAnalytics">
+                    Analytics Data
+                </label>
+                <label>
+                    <input type="checkbox" id="exportUsers">
+                    Users Data
+                </label>
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="confirmExport()" class="export-btn">
+                    Export Data
+                </button>
+                <button onclick="closeExportModal()" class="cancel-btn">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div class="notification-area" id="notificationArea"></div>
+
+    <!-- Screen Reader Announcement -->
+    <div id="screenReaderAnnouncement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script src="doctors-data.js"></script>
+    <script src="analytics.js"></script>
+    <script src="notification.js"></script>
+    <script src="offline.js"></script>
+    <script src="accessibility.js"></script>
+    <script src="admin.js"></script>
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Check admin authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminAuth();
+        });
+        
+        // Admin authentication check
+        function checkAdminAuth() {
+            const adminToken = localStorage.getItem('adminToken');
+            const loginContainer = document.getElementById('adminLogin');
+            const dashboard = document.getElementById('adminDashboard');
+            
+            if (adminToken === 'admin123') {
+                // Already authenticated
+                loginContainer.style.display = 'none';
+                dashboard.style.display = 'block';
+                announceToScreenReader('Admin dashboard loaded');
+            } else {
+                // Show login
+                loginContainer.style.display = 'block';
+                dashboard.style.display = 'none';
+                announceToScreenReader('Please login to admin panel');
+            }
+        }
+        
+        // Admin login
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === 'admin123') {
+                localStorage.setItem('adminToken', 'admin123');
+                showNotification('Login successful!', 'success');
+                checkAdminAuth();
+                
+                // Track admin login
+                trackEvent('admin_login_success');
+            } else {
+                showNotification('Invalid password!', 'error');
+                trackEvent('admin_login_failed');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('adminToken');
+            showNotification('Logged out successfully', 'success');
+            checkAdminAuth();
+            trackEvent('admin_logout');
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'}</strong>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            // Announce to screen reader
+            announceToScreenReader(message);
+        }
+        
+        // Export data
+        function exportData() {
+            document.getElementById('exportModal').style.display = 'block';
+        }
+        
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+        
+        function confirmExport() {
+            const format = document.querySelector('input[name="exportFormat"]:checked').value;
+            // Export logic would be implemented here
+            showNotification(`Data exported in ${format.toUpperCase()} format`, 'success');
+            closeExportModal();
+        }
+        
+        // Import data
+        function importData() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json,.csv,.xlsx';
+            
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showNotification(`Importing ${file.name}...`, 'info');
+                    // Import logic would be implemented here
+                }
+            };
+            
+            fileInput.click();
+        }
+        
+        // Tab switching
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Set active button
+            event.target.classList.add('active');
+        }
+        
+        // Initialize charts
+        function initCharts() {
+            // Usage Chart
+            const usageCtx = document.getElementById('usageChart');
+            if (usageCtx) {
+                new Chart(usageCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Page Views',
+                            data: [65, 59, 80, 81, 56, 55, 40],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Doctor Chart
+            const doctorCtx = document.getElementById('doctorChart');
+            if (doctorCtx) {
+                new Chart(doctorCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Dr. Sharma', 'Dr. Verma', 'Dr. Kumar', 'Dr. Singh', 'Dr. Patel'],
+                        datasets: [{
+                            label: 'Appointments',
+                            data: [12, 19, 8, 15, 7],
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(231, 76, 60, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Initialize on page load
+        setTimeout(initCharts, 1000);
+        
+        // Make functions global
+        window.showNotification = showNotification;
+        window.announceToScreenReader = announceToScreenReader;
+        window.trackEvent = trackEvent;
+        
+    </script>
+    
+</body>
+</html>

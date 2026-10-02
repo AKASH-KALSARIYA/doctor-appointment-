@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - RuralCare</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <header>
+        <button onclick="window.history.back()" class="back-btn">
+            ← Back
+        </button>
+        
+        <h1>Book Appointment</h1>
+        
+        <button onclick="window.location.href='index.html'" class="home-btn">
+            🏠 Home
+        </button>
+    </header>
+
+    <main id="main-content">
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-label">Doctor Info</span>
+            </div>
+            <div class="step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-label">Patient Details</span>
+            </div>
+            <div class="step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-label">Time & Date</span>
+            </div>
+            <div class="step" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+
+        <!-- Doctor Information -->
+        <div id="step1" class="booking-step active">
+            <div class="doctor-summary" id="doctorInfo">
+                <!-- Doctor info will be loaded dynamically -->
+                <div class="loading">
+                    Loading doctor information...
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button onclick="nextStep(2)" class="next-btn">
+                    Next: Patient Details →
+                </button>
+            </div>
+        </div>
+
+        <!-- Patient Details -->
+        <div id="step2" class="booking-step">
+            <h2>Patient Information</h2>
+            
+            <form id="patientForm">
+                <div class="form-group">
+                    <label for="patientName">Full Name *</label>
+                    <div class="input-with-button">
+                        <input type="text" id="patientName" placeholder="Enter your full name" required>
+                        <button type="button" onclick="startVoiceInput()" class="voice-btn" title="Voice Input">
+                            🎤
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patientAge">Age *</label>
+                        <input type="number" id="patientAge" placeholder="Age" min="1" max="120" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                            <option value="prefer-not-to-say">Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="+91XXXXXXXXXX" pattern="\+91[6-9]\d{9}" required>
+                    <small class="hint">Format: +91 followed by 10-digit mobile number</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email (Optional)</label>
+                    <input type="email" id="email" placeholder="email@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="symptoms">Symptoms / Reason for Visit *</label>
+                    <textarea id="symptoms" placeholder="Describe your symptoms or reason for visit..." rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="previousHistory">Previous Medical History (Optional)</label>
+                    <textarea id="previousHistory" placeholder="Any previous medical conditions, surgeries, or allergies..." rows="2"></textarea>
+                </div>
+            </form>
+            
+            <div class="step-actions">
+                <button onclick="prevStep(1)" class="prev-btn">
+                    ← Back
+                </button>
+                <button onclick="nextStep(3)" class="next-btn">
+                    Next: Select Time →
+                </button>
+            </div>
+        </div>
+
+        <!-- Time & Date Selection -->
+        <div id="step3" class="booking-step">
+            <h2>Select Date & Time</h2>
+            
+            <div class="date-time-selection">
+                <div class="form-group">
+                    <label for="appointmentDate">Select Date *</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Available Time Slots *</label>
+                    <div class="time-slots-grid" id="timeSlots">
+                        <!-- Time slots will be loaded dynamically -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferredTime">Preferred Time Range</label>
+                    <select id="preferredTime">
+                        <option value="">Any Time</option>
+                        <option value="morning">Morning (9 AM - 12 PM)</option>
+                        <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
+                        <option value="evening">Evening (4 PM - 7 PM)</option>
+                    </select>
+                </div>
+                
+                <div class="urgent-consultation">
+                    <label>
+                        <input type="checkbox" id="urgentConsultation">
+                        <strong>Urgent Consultation Needed</strong>
+                        <small>(We'll try to accommodate on priority)</small>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button onclick="prevStep(2)" class="prev-btn">
+                    ← Back
+                </button>
+                <button onclick="nextStep(4)" class="next-btn">
+                    Next: Review & Confirm →
+                </button>
+            </div>
+        </div>
+
+        <!-- Review & Confirmation -->
+        <div id="step4" class="booking-step">
+            <h2>Review & Confirm</h2>
+            
+            <div class="confirmation-summary">
+                <div class="summary-section">
+                    <h3>👨‍⚕️ Doctor Details</h3>
+                    <div id="summaryDoctor">
+                        <!-- Doctor summary will be loaded -->
+                    </div>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>👤 Patient Details</h3>
+                    <div id="summaryPatient">
+                        <!-- Patient summary will be loaded -->
+                    </div>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>📅 Appointment Details</h3>
+                    <div id="summaryAppointment">
+                        <!-- Appointment summary will be loaded -->
+                    </div>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>💰 Payment Information</h3>
+                    <div class="payment-info">
+                        <p>Consultation Fee: <span id="consultationFee">₹0</span></p>
+                        <p>Platform Fee: <span>₹0</span></p>
+                        <p class="total">Total Amount: <span id="totalAmount">₹0</span></p>
+                        <small>* Payment to be made at the clinic</small>
+                    </div>
+                </div>
+                
+                <div class="terms-agreement">
+                    <label>
+                        <input type="checkbox" id="termsAgreement" required>
+                        I agree to the <a href="#" onclick="showTerms()">Terms & Conditions</a> and 
+                        <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" id="smsNotifications" checked>
+                        Receive SMS notifications about my appointment
+                    </label>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button onclick="prevStep(3)" class="prev-btn">
+                    ← Back
+                </button>
+                <button onclick="confirmBooking()" class="confirm-btn" id="confirmBtn">
+                    ✅ Confirm Booking
+                </button>
+            </div>
+        </div>
+
+        <!-- OTP Verification Section -->
+        <div id="otpSection" class="otp-section" style="display: none;">
+            <h2>📱 Phone Verification</h2>
+            <p>We've sent an OTP to <strong id="phoneNumber"></strong></p>
+            
+            <div id="recaptcha-container"></div>
+            
+            <div class="form-group">
+                <label for="otp">Enter 6-digit OTP</label>
+                <input type="text" id="otp" placeholder="123456" maxlength="6" pattern="\d{6}">
+                <button onclick="sendOTP()" id="sendOTPBtn" class="otp-btn">
+                    Send OTP
+                </button>
+                <button onclick="verifyOTP()" id="verifyOTPBtn" class="otp-btn verify-btn" disabled>
+                    Verify OTP
+                </button>
+            </div>
+            
+            <p class="resend-otp">
+                Didn't receive OTP? 
+                <a href="#" onclick="resendOTP()">Resend</a> 
+                (<span id="resendTimer">60</span>s)
+            </p>
+        </div>
+    </main>
+
+    <!-- Terms & Conditions Modal -->
+    <div id="termsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Terms & Conditions</h2>
+            <div class="modal-body">
+                <h3>Appointment Booking Terms</h3>
+                <ol>
+                    <li>Appointments must be booked at least 24 hours in advance</li>
+                    <li>Cancellations should be made 12 hours before the appointment</li>
+                    <li>No-shows may be charged a nominal fee</li>
+                    <li>Consultation fee is payable at the clinic</li>
+                    <li>Emergency cases will be given priority</li>
+                </ol>
+                
+                <h3>Privacy Policy</h3>
+                <p>We respect your privacy. Your personal and medical information will be kept confidential and used only for providing healthcare services.</p>
+            </div>
+            <button onclick="closeTermsModal()" class="cancel-btn">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Booking Confirmation Modal -->
+    <div id="confirmationModal" class="modal" style="display: none;">
+        <div class="modal-content success">
+            <div class="confirmation-icon">✅</div>
+            <h2>Appointment Confirmed!</h2>
+            
+            <div class="booking-details">
+                <p><strong>Booking ID:</strong> <span id="bookingId"></span></p>
+                <p><strong>Date & Time:</strong> <span id="bookingDateTime"></span></p>
+                <p><strong>Doctor:</strong> <span id="bookingDoctor"></span></p>
+            </div>
+            
+            <p class="confirmation-message">
+                You will receive an SMS confirmation shortly. 
+                Please arrive 15 minutes before your appointment time.
+            </p>
+            
+            <div class="modal-actions">
+                <button onclick="goToConfirmationPage()" class="view-btn">
+                    View Details
+                </button>
+                <button onclick="bookAnother()" class="another-btn">
+                    Book Another
+                </button>
+                <button onclick="goHome()" class="home-btn">
+                    Go Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div class="notification-area" id="notificationArea"></div>
+
+    <!-- Screen Reader Announcement -->
+    <div id="screenReaderAnnouncement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script src="doctors-data.js"></script>
+    <script src="analytics.js"></script>
+    <script src="offline.js"></script>
+    <script src="accessibility.js"></script>
+    <script src="booking.js"></script>
+    
+    <script>
+        // Initialize booking page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Booking page initialized");
+            
+            // Check if doctor is selected
+            const doctorId = localStorage.getItem('selectedDoctorId');
+            if (!doctorId) {
+                showNotification("No doctor selected. Redirecting...", "error");
+                setTimeout(() => window.location.href = 'index.html', 2000);
+                return;
+            }
+            
+            // Load doctor information
+            loadDoctorInfo();
+            
+            // Initialize date picker
+            initDatePicker();
+            
+            // Setup step navigation
+            setupStepNavigation();
+            
+            // Announce page load
+            announceToScreenReader("Appointment booking page loaded. Please fill in your details.");
+            
+            // Track booking start
+            trackEvent('booking_page_loaded', { doctorId });
+        });
+        
+        // Step navigation functions
+        let currentStep = 1;
+        
+        function setupStepNavigation() {
+            // Add click handlers to progress steps
+            document.querySelectorAll('.progress-indicator .step').forEach(step => {
+                step.addEventListener('click', function() {
+                    const stepNumber = parseInt(this.getAttribute('data-step'));
+                    if (stepNumber <= currentStep) {
+                        goToStep(stepNumber);
+                    }
+                });
+            });
+        }
+        
+        function goToStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.booking-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Remove active class from all progress steps
+            document.querySelectorAll('.progress-indicator .step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show selected step
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            
+            // Update progress indicator
+            for (let i = 1; i <= stepNumber; i++) {
+                document.querySelector(`.step[data-step="${i}"]`).classList.add('active');
+            }
+            
+            // Update current step
+            currentStep = stepNumber;
+            
+            // Announce step change to screen reader
+            const stepLabels = {
+                1: 'Doctor information',
+                2: 'Patient details',
+                3: 'Time and date selection',
+                4: 'Review and confirmation'
+            };
+            announceToScreenReader(`Step ${stepNumber}: ${stepLabels[stepNumber]}`);
+        }
+        
+        function nextStep(nextStepNumber) {
+            // Validate current step before proceeding
+            if (validateStep(currentStep)) {
+                goToStep(nextStepNumber);
+                updateSummary();
+            }
+        }
+        
+        function prevStep(prevStepNumber) {
+            goToStep(prevStepNumber);
+        }
+        
+        function validateStep(stepNumber) {
+            switch (stepNumber) {
+                case 2:
+                    return validatePatientForm();
+                case 3:
+                    return validateDateTimeSelection();
+                case 4:
+                    return validateConfirmation();
+                default:
+                    return true;
+            }
+        }
+        
+        function validatePatientForm() {
+            const name = document.getElementById('patientName').value.trim();
+            const age = document.getElementById('patientAge').value;
+            const gender = document.getElementById('gender').value;
+            const phone = document.getElementById('phone').value.trim();
+            const symptoms = document.getElementById('symptoms').value.trim();
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            if (!name) {
+                isValid = false;
+                errorMessage = 'Please enter your name';
+            } else if (name.length < 2) {
+                isValid = false;
+                errorMessage = 'Name must be at least 2 characters';
+            }
+            
+            if (!age) {
+                isValid = false;
+                errorMessage = 'Please enter your age';
+            } else if (age < 1 || age > 120) {
+                isValid = false;
+                errorMessage = 'Please enter a valid age (1-120)';
+            }
+            
+            if (!gender) {
+                isValid = false;
+                errorMessage = 'Please select your gender';
+            }
+            
+            if (!phone) {
+                isValid = false;
+                errorMessage = 'Please enter your phone number';
+            } else if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid Indian phone number (+91XXXXXXXXXX)';
+            }
+            
+            if (!symptoms) {
+                isValid = false;
+                errorMessage = 'Please describe your symptoms';
+            }
+            
+            if (!isValid) {
+                showNotification(errorMessage, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function validateDateTimeSelection() {
+            const date = document.getElementById('appointmentDate').value;
+            const selectedSlot = document.querySelector('.time-slot.selected');
+            
+            if (!date) {
+                showNotification('Please select a date', 'error');
+                return false;
+            }
+            
+            // Check if date is in the future
+            const selectedDate = new Date(date);
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < tomorrow) {
+                showNotification('Please select a future date', 'error');
+                return false;
+            }
+            
+            if (!selectedSlot) {
+                showNotification('Please select a time slot', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function validateConfirmation() {
+            const termsAgreed = document.getElementById('termsAgreement').checked;
+            
+            if (!termsAgreed) {
+                showNotification('Please agree to the Terms & Conditions', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function loadDoctorInfo() {
+            const doctorId = localStorage.getItem('selectedDoctorId');
+            const doctor = getDoctorById(doctorId);
+            
+            if (!doctor) {
+                showNotification('Doctor not found', 'error');
+                return;
+            }
+            
+            const doctorInfo = document.getElementById('doctorInfo');
+            doctorInfo.innerHTML = `
+                <div class="doctor-card">
+                    <h3>${doctor.name}</h3>
+                    <p class="specialization">${doctor.specialization || 'General Physician'}</p>
+                    <p class="experience">${doctor.experience || 5} years experience</p>
+                    <p class="fees">Consultation Fee: ₹${doctor.fees || 300}</p>
+                    <p class="availability">Available: ${doctor.availability || 'Mon-Fri, 9AM-5PM'}</p>
+                    <p class="location">📍 ${doctor.location || 'Rural Health Center'}</p>
+                </div>
+            `;
+            
+            // Update payment summary
+            document.getElementById('consultationFee').textContent = `₹${doctor.fees || 300}`;
+            document.getElementById('totalAmount').textContent = `₹${doctor.fees || 300}`;
+        }
+        
+        function initDatePicker() {
+            const dateInput = document.getElementById('appointmentDate');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Set min date to tomorrow
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+            
+            // Set max date to 3 months from now
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 3);
+            dateInput.max = maxDate.toISOString().split('T')[0];
+            
+            // Load prefilled date if exists
+            const prefilledDate = localStorage.getItem('prefilledDate');
+            if (prefilledDate) {
+                dateInput.value = prefilledDate;
+                localStorage.removeItem('prefilledDate');
+            } else {
+                dateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+            
+            // Generate time slots
+            generateTimeSlots();
+            
+            // Update time slots when date changes
+            dateInput.addEventListener('change', generateTimeSlots);
+        }
+        
+        function generateTimeSlots() {
+            const slotsContainer = document.getElementById('timeSlots');
+            if (!slotsContainer) return;
+            
+            const slots = [
+                '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+                '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
+                '05:00 PM', '06:00 PM'
+            ];
+            
+            slotsContainer.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotElement = document.createElement('button');
+                slotElement.type = 'button';
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot;
+                slotElement.setAttribute('aria-label', `Select ${slot} time slot`);
+                
+                // Check if prefilled time matches
+                const prefilledTime = localStorage.getItem('prefilledTime');
+                if (prefilledTime && prefilledTime.includes(slot)) {
+                    slotElement.classList.add('selected');
+                    localStorage.removeItem('prefilledTime');
+                }
+                
+                slotElement.addEventListener('click', function() {
+                    // Remove selection from all slots
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    
+                    // Select clicked slot
+                    this.classList.add('selected');
+                    announceToScreenReader(`Selected time: ${slot}`);
+                    
+                    // Track time selection
+                    trackEvent('time_slot_selected', { time: slot });
+                });
+                
+                slotsContainer.appendChild(slotElement);
+            });
+        }
+        
+        function updateSummary() {
+            // Update doctor summary
+            const doctorId = localStorage.getItem('selectedDoctorId');
+            const doctor = getDoctorById(doctorId);
+            
+            if (doctor) {
+                document.getElementById('summaryDoctor').innerHTML = `
+                    <p><strong>Name:</strong> ${doctor.name}</p>
+                    <p><strong>Specialization:</strong> ${doctor.specialization || 'General Physician'}</p>
+                    <p><strong>Fees:</strong> ₹${doctor.fees || 300}</p>
+                `;
+            }
+            
+            // Update patient summary
+            const name = document.getElementById('patientName').value;
+            const age = document.getElementById('patientAge').value;
+            const gender = document.getElementById('gender').value;
+            const phone = document.getElementById('phone').value;
+            const symptoms = document.getElementById('symptoms').value;
+            
+            document.getElementById('summaryPatient').innerHTML = `
+                <p><strong>Name:</strong> ${name || 'Not provided'}</p>
+                <p><strong>Age:</strong> ${age || 'Not provided'}</p>
+                <p><strong>Gender:</strong> ${gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Not provided'}</p>
+                <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+                <p><strong>Symptoms:</strong> ${symptoms.substring(0, 100) || 'Not provided'}</p>
+            `;
+            
+            // Update appointment summary
+            const date = document.getElementById('appointmentDate').value;
+            const selectedSlot = document.querySelector('.time-slot.selected');
+            const time = selectedSlot ? selectedSlot.textContent : 'Not selected';
+            
+            document.getElementById('summaryAppointment').innerHTML = `
+                <p><strong>Date:</strong> ${date ? new Date(date).toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }) : 'Not selected'}</p>
+                <p><strong>Time:</strong> ${time}</p>
+                <p><strong>Duration:</strong> 15-20 minutes</p>
+            `;
+        }
+        
+        // OTP Functions
+        function showOTPSection() {
+            const phone = document.getElementById('phone').value;
+            document.getElementById('phoneNumber').textContent = phone;
+            document.getElementById('otpSection').style.display = 'block';
+            startResendTimer();
+            
+            announceToScreenReader('Phone verification required. Please enter the OTP sent to your phone.');
+        }
+        
+        function startResendTimer() {
+            let timeLeft = 60;
+            const timerElement = document.getElementById('resendTimer');
+            const resendLink = document.querySelector('.resend-otp a');
+            
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.color = '#ccc';
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.color = '#3498db';
+                }
+            }, 1000);
+        }
+        
+        function resendOTP() {
+            // Implement OTP resend logic
+            showNotification('OTP resent successfully', 'success');
+            startResendTimer();
+            trackEvent('otp_resent');
+        }
+        
+        // Modal Functions
+        function showTerms() {
+            document.getElementById('termsModal').style.display = 'flex';
+        }
+        
+        function closeTermsModal() {
+            document.getElementById('termsModal').style.display = 'none';
+        }
+        
+        function showPrivacy() {
+            // Could show privacy modal or redirect
+            showNotification('Privacy policy information', 'info');
+        }
+        
+        function showConfirmationModal(bookingDetails) {
+            document.getElementById('bookingId').textContent = bookingDetails.bookingId;
+            document.getElementById('bookingDateTime').textContent = 
+                `${bookingDetails.date} at ${bookingDetails.time}`;
+            document.getElementById('bookingDoctor').textContent = bookingDetails.doctorName;
+            
+            document.getElementById('confirmationModal').style.display = 'flex';
+            
+            // Announce success to screen reader
+            announceToScreenReader(`Appointment confirmed! Booking ID: ${bookingDetails.bookingId}`);
+            
+            // Track successful booking
+            trackEvent('appointment_confirmed_modal', { 
+                bookingId: bookingDetails.bookingId 
+            });
+        }
+        
+        function goToConfirmationPage() {
+            window.location.href = 'confirmation.html';
+        }
+        
+        function bookAnother() {
+            localStorage.removeItem('selectedDoctorId');
+            window.location.href = 'index.html';
+        }
+        
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            if (!notificationArea) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'}</strong>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            announceToScreenReader(message);
+        }
+        
+        // Confirm booking
+        function confirmBooking() {
+            if (!validateConfirmation()) {
+                return;
+            }
+            
+            // Collect all booking data
+            const bookingData = {
+                doctorId: localStorage.getItem('selectedDoctorId'),
+                doctorName: document.querySelector('#doctorInfo h3')?.textContent || 'Doctor',
+                patientName: document.getElementById('patientName').value,
+                patientAge: document.getElementById('patientAge').value,
+                gender: document.getElementById('gender').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                symptoms: document.getElementById('symptoms').value,
+                previousHistory: document.getElementById('previousHistory').value,
+                appointmentDate: document.getElementById('appointmentDate').value,
+                appointmentTime: document.querySelector('.time-slot.selected')?.textContent || '',
+                bookingTime: new Date().toISOString(),
+                bookingId: 'BOOK-' + Date.now().toString(36).toUpperCase(),
+                fees: document.getElementById('consultationFee').textContent.replace('₹', ''),
+                urgent: document.getElementById('urgentConsultation').checked,
+                smsNotifications: document.getElementById('smsNotifications').checked
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('lastBooking', JSON.stringify(bookingData));
+            
+            // Show confirmation modal
+            showConfirmationModal({
+                bookingId: bookingData.bookingId,
+                date: new Date(bookingData.appointmentDate).toLocaleDateString('en-IN'),
+                time: bookingData.appointmentTime,
+                doctorName: bookingData.doctorName
+            });
+            
+            // Track booking completion
+            trackEvent('appointment_booking_completed', {
+                bookingId: bookingData.bookingId,
+                doctorId: bookingData.doctorId
+            });
+            
+            // Schedule reminder
+            scheduleAppointmentReminder(bookingData);
+        }
+        
+        function scheduleAppointmentReminder(appointmentData) {
+            // This would be implemented in notification.js
+            console.log('Reminder scheduled for:', appointmentData);
+        }
+        
+        // Make functions global
+        window.showNotification = showNotification;
+        window.announceToScreenReader = announceToScreenReader;
+        window.trackEvent = trackEvent;
+        window.getDoctorById = getDoctorById;
+        
+        // Add voice input function
+        window.startVoiceInput = function() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-IN';
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    showNotification('Listening... Please speak your name', 'info');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('patientName').value = transcript;
+                    showNotification('Name captured successfully', 'success');
+                    trackEvent('voice_input_used', { field: 'patient_name' });
+                };
+                
+                recognition.onerror = function(event) {
+                    showNotification('Could not recognize speech. Please try again.', 'error');
+                };
+                
+                recognition.start();
+            } else {
+                showNotification('Voice input not supported in your browser', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

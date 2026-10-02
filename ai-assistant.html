@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuralCare AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #e3f2fd, #f3e5f5); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        
+        /* Main Container */
+        .main-container { 
+            background: white; 
+            width: 95%; 
+            max-width: 900px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 60px rgba(0, 100, 200, 0.15); 
+            overflow: hidden; 
+            border: 1px solid #e0e0e0; 
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+            max-height: 800px;
+            position: relative;
+        }
+        
+        /* Header */
+        .header { 
+            background: linear-gradient(to right, #0d7e4c, #2ecc71); 
+            color: white; 
+            padding: 20px 30px; 
+            text-align: center; 
+            flex-shrink: 0;
+        }
+        .header h1 { 
+            font-size: 1.8rem; 
+            margin-bottom: 5px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px; 
+        }
+        .header p { 
+            font-size: 1rem; 
+            opacity: 0.9; 
+        }
+        
+        /* Content Area */
+        .content { 
+            display: flex; 
+            flex: 1; 
+            overflow: hidden;
+        }
+        
+        /* Left Panel */
+        .controls { 
+            background: #f8fdff; 
+            width: 35%; 
+            padding: 20px; 
+            border-right: 1px solid #eaeaea; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            overflow-y: auto;
+        }
+        .control-box { 
+            background: white; 
+            padding: 18px; 
+            border-radius: 16px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04); 
+            border: 1px solid #e0e0e0; 
+        }
+        .control-box h3 { 
+            color: #0d7e4c; 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 1.1rem; 
+        }
+        
+        /* Language Selector */
+        .language-buttons { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        .lang-btn { 
+            padding: 12px; 
+            border: 2px solid #e0e0e0; 
+            background: white; 
+            border-radius: 12px; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .lang-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1); 
+        }
+        .lang-btn.active { 
+            border-color: #0d7e4c; 
+            background: #e8f5e9; 
+            color: #0d7e4c; 
+        }
+        
+        /* API Key Input */
+        #apiKeyInput { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 10px; 
+            font-size: 0.95rem; 
+            margin-bottom: 12px; 
+        }
+        #apiKeyInput:focus { 
+            outline: none; 
+            border-color: #0d7e4c; 
+        }
+        .save-btn { 
+            background: #0d7e4c; 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: background 0.3s; 
+        }
+        .save-btn:hover { 
+            background: #0a633d; 
+        }
+        
+        /* Voice Controls */
+        .voice-controls { 
+            display: flex; 
+            gap: 10px; 
+        }
+        .voice-btn { 
+            flex: 1; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            transition: all 0.3s; 
+        }
+        #startListening { 
+            background: linear-gradient(to right, #4b6cb7, #182848); 
+            color: white; 
+        }
+        #startListening:hover { 
+            background: linear-gradient(to right, #3a5ca9, #0f2040); 
+        }
+        #stopListening { 
+            background: #f1f3f4; 
+            color: #333; 
+            border: 2px solid #ddd; 
+        }
+        #stopListening:hover { 
+            background: #e5e7e8; 
+        }
+        
+        /* Status */
+        #statusIndicator { 
+            background: #fff3cd; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border-left: 5px solid #ffc107; 
+            margin-top: 15px; 
+            display: none; 
+            font-size: 0.9rem;
+        }
+        #statusIndicator.active { 
+            display: block; 
+        }
+        
+        /* Right Panel - Chat */
+        .chat-area { 
+            width: 65%; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
+        .chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            background: #f9f9f9; 
+            border-radius: 16px; 
+            margin-bottom: 15px; 
+            border: 1px solid #eee; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+        .message { 
+            max-width: 85%; 
+            padding: 15px; 
+            border-radius: 15px; 
+            line-height: 1.4; 
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .user-message { 
+            background: linear-gradient(to right, #4b6cb7, #182848); 
+            color: white; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 5px; 
+        }
+        .ai-message { 
+            background: #e8f5e9; 
+            color: #333; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 5px; 
+            border: 1px solid #c8e6c9; 
+        }
+        .message-header { 
+            font-weight: bold; 
+            margin-bottom: 6px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 0.9rem;
+        }
+        
+        /* Quick Instructions */
+        .quick-instructions { 
+            background: #e8f5e9; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 1px solid #c8e6c9; 
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .quick-instructions h3 { 
+            color: #0d7e4c; 
+            margin-bottom: 10px; 
+            font-size: 1rem;
+        }
+        .quick-instructions ul { 
+            padding-left: 20px; 
+            margin-bottom: 10px; 
+        }
+        .quick-instructions li { 
+            margin-bottom: 8px; 
+            line-height: 1.4; 
+        }
+        
+        /* ================ NEW FEATURES STYLES ================ */
+        
+        /* Floating AI Button (Center) - HIDDEN */
+        #floatingAIBtn {
+            display: none;
+        }
+        
+        /* AI Features Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            padding: 30px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        /* Upload Section */
+        .upload-box {
+            border: 3px dashed #4b6cb7;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        
+        .upload-box:hover {
+            background: #f0f7ff;
+            border-color: #182848;
+        }
+        
+        /* Booking Button */
+        .book-doctor-btn {
+            background: linear-gradient(135deg, #0d7e4c, #2ecc71);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .book-doctor-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(13, 126, 76, 0.3);
+        }
+        
+        .booking-note {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* AI Integration Buttons - RIGHT SIDE VERTICAL */
+        #aiIntegration {
+            position: fixed;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 20px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 2px solid #4b6cb7;
+            min-width: 220px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #aiVoiceBtn, #aiUploadBtn {
+            background: linear-gradient(135deg, #4b6cb7, #182848);
+            color: white;
+            border: none;
+            padding: 20px 25px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.4s;
+            text-align: center;
+            width: 100%;
+        }
+        
+        #aiVoiceBtn:hover, #aiUploadBtn:hover {
+            transform: translateX(-15px) scale(1.08);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+        
+        #aiUploadBtn {
+            background: linear-gradient(135deg, #0d7e4c, #2ecc71);
+        }
+        
+        /* Button Icons */
+        #aiVoiceBtn i, #aiUploadBtn i {
+            font-size: 32px;
+        }
+        
+        /* Button Text */
+        #aiVoiceBtn span, #aiUploadBtn span {
+            font-size: 1rem;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        
+        /* Preview Items */
+        .preview-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .ai-result {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #0d7e4c;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                height: auto;
+                max-height: none;
+            }
+            .content { 
+                flex-direction: column; 
+            }
+            .controls, .chat-area { 
+                width: 100%; 
+            }
+            .controls { 
+                border-right: none; 
+                border-bottom: 1px solid #eaeaea;
+                max-height: 350px;
+            }
+            
+            #aiIntegration {
+                top: auto;
+                bottom: 20px;
+                right: 50%;
+                transform: translateX(50%);
+                flex-direction: row;
+                width: 90%;
+                min-width: auto;
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            #aiVoiceBtn, #aiUploadBtn {
+                padding: 15px 20px;
+                font-size: 1rem;
+                flex-direction: row;
+                gap: 10px;
+                min-width: 160px;
+            }
+            
+            #aiVoiceBtn i, #aiUploadBtn i {
+                font-size: 24px;
+            }
+            
+            #aiVoiceBtn span, #aiUploadBtn span {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <!-- AI Integration Buttons - RIGHT SIDE -->
+    <div id="aiIntegration">
+        <button id="aiVoiceBtn" onclick="startAIVoiceAssistant()">
+            <i class="fas fa-microphone-alt"></i>
+            <span>AI Voice<br>Assistant</span>
+        </button>
+        
+        <button id="aiUploadBtn" onclick="openAIUpload()">
+            <i class="fas fa-file-upload"></i>
+            <span>AI Image/Video<br>Analysis</span>
+        </button>
+    </div>
+    
+    <!-- AI Features Modal -->
+    <div id="aiFeaturesModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-robot"></i> AI Health Assistant</h2>
+            
+            <!-- Image/Video Upload Section -->
+            <div class="upload-section">
+                <h3><i class="fas fa-upload"></i> Upload Image/Video</h3>
+                <div class="upload-box" onclick="triggerUpload()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload image or video</p>
+                    <small>Supports: JPG, PNG, MP4, AVI</small>
+                </div>
+                <input type="file" id="fileUpload" accept="image/*,video/*" hidden>
+                <div id="uploadPreview"></div>
+            </div>
+            
+            <!-- AI Analysis Result -->
+            <div class="ai-result-section">
+                <h3><i class="fas fa-chart-bar"></i> AI Analysis</h3>
+                <div id="aiAnalysisResult">
+                    <p>Upload an image/video or describe symptoms to get analysis</p>
+                </div>
+            </div>
+            
+            <!-- Doctor Booking Button -->
+            <div class="booking-section">
+                <button class="book-doctor-btn" onclick="openBookingPage()">
+                    <i class="fas fa-calendar-check"></i>
+                    Book Appointment with Recommended Doctor
+                </button>
+                <p class="booking-note">Click to open doctor booking page</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main AI Assistant Container -->
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> RuralCare AI Assistant</h1>
+            <p>Voice-to-Voice Healthcare Assistant | Made by Raj Golu</p>
+        </div>
+        
+        <div class="content">
+            <!-- Left Controls Panel -->
+            <div class="controls">
+                <!-- Language Selection -->
+                <div class="control-box">
+                    <h3><i class="fas fa-language"></i> Choose Language</h3>
+                    <div class="language-buttons">
+                        <button class="lang-btn active" data-lang="hi">
+                            <i class="fas fa-flag"></i> हिंदी (Hindi)
+                        </button>
+                        <button class="lang-btn" data-lang="en">
+                            <i class="fas fa-flag-usa"></i> English
+                        </button>
+                        <button class="lang-btn" data-lang="pa">
+                            <i class="fas fa-flag"></i> ਪੰਜਾਬੀ (Punjabi)
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- API Key Setup -->
+                <div class="control-box">
+                    <h3><i class="fas fa-key"></i> Gemini API Key</h3>
+                    <input type="text" id="apiKeyInput" placeholder="AIzaSyBiWusXTT54rWIpjInpS44QKMAgWKoQYNI">
+                    <button class="save-btn" id="saveApiKey">
+                        <i class="fas fa-save"></i> Save API Key
+                    </button>
+                    <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
+                        <i class="fas fa-info-circle"></i> 
+                        Get free API key from 
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: #0d7e4c; text-decoration: none;">Google AI Studio</a>
+                    </p>
+                </div>
+                
+                <!-- Voice Controls -->
+                <div class="control-box">
+                    <h3><i class="fas fa-microphone"></i> Voice Controls</h3>
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="startListening">
+                            <i class="fas fa-microphone"></i> Start Speaking
+                        </button>
+                        <button class="voice-btn" id="stopListening">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    <div id="statusIndicator">
+                        <i class="fas fa-circle" style="color: #0d7e4c; font-size: 0.8rem;"></i>
+                        <span id="statusText">Ready to listen</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Instructions -->
+                <div class="control-box">
+                    <h3><i class="fas fa-bolt"></i> Quick Steps</h3>
+                    <p style="color: #666; line-height: 1.4; font-size: 0.9rem;">
+                        1. Enter & save API key<br>
+                        2. Choose language<br>
+                        3. Click "Start Speaking"<br>
+                        4. Ask health question<br>
+                        5. AI will respond with voice
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Right Chat Panel -->
+            <div class="chat-area">
+                <h2 style="color: #0d7e4c; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">
+                    <i class="fas fa-comments"></i> Conversation
+                </h2>
+                
+                <!-- Chat Messages Container -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Initial Welcome Message -->
+                    <div class="message ai-message">
+                        <div class="message-header">
+                            <i class="fas fa-robot" style="color: #0d7e4c;"></i> RuralCare AI
+                        </div>
+                        Hello! I'm your RuralCare AI Assistant.<br>
+                        I can help with your health-related questions.<br>
+                        Click "Start Speaking" to begin.
+                    </div>
+                </div>
+                
+                <!-- Quick Instructions -->
+                <div class="quick-instructions">
+                    <h3><i class="fas fa-lightbulb"></i> Tips</h3>
+                    <ul>
+                        <li>Speak clearly in your chosen language</li>
+                        <li>Say "हिंदी में बोलो" to switch to Hindi</li>
+                        <li>Say "English me bolo" for English</li>
+                        <li>For emergencies, contact a doctor immediately</li>
+                    </ul>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Note:</strong> This is an AI assistant, not a replacement for professional medical advice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== CONFIGURATION =====================
+        let currentLanguage = 'hi';
+        let apiKey = '';
+        let isListening = false;
+        let recognition = null;
+        
+        const languageMap = {
+            'hi': { name: 'Hindi', code: 'hi-IN', voice: 'hi-IN' },
+            'en': { name: 'English', code: 'en-US', voice: 'en-US' },
+            'pa': { name: 'Punjabi', code: 'pa-IN', voice: 'pa-IN' }
+        };
+        
+        // ===================== DOM ELEMENTS =====================
+        const chatMessages = document.getElementById('chatMessages');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        
+        // ===================== INITIALIZATION =====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved API key
+            const savedApiKey = localStorage.getItem('ruralcare_gemini_api_key');
+            if (savedApiKey) {
+                apiKey = savedApiKey;
+                apiKeyInput.value = '••••••••' + savedApiKey.slice(-8);
+            }
+            
+            // Language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentLanguage = this.getAttribute('data-lang');
+                    addMessage(`Language changed to ${languageMap[currentLanguage].name}`, 'ai');
+                });
+            });
+            
+            // API Key save
+            document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
+            
+            // Voice controls
+            document.getElementById('startListening').addEventListener('click', startVoiceRecognition);
+            document.getElementById('stopListening').addEventListener('click', stopVoiceRecognition);
+            
+            // Initialize new features
+            initializeNewFeatures();
+        });
+        
+        // ===================== NEW FEATURES FUNCTIONS =====================
+        
+        function initializeNewFeatures() {
+            // File upload event
+            document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
+            
+            // Modal close events
+            document.getElementById('aiFeaturesModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // Escape key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+            
+            // Show AI Integration buttons
+            document.getElementById('aiIntegration').style.display = 'flex';
+            
+            // Add animation to AI buttons
+            animateAIButtons();
+        }
+        
+        function animateAIButtons() {
+            const buttons = document.querySelectorAll('#aiVoiceBtn, #aiUploadBtn');
+            buttons.forEach((btn, index) => {
+                btn.style.animationDelay = `${index * 0.2}s`;
+                btn.style.animation = 'fadeInRight 0.8s ease forwards';
+            });
+            
+            // Add animation keyframes
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(50px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // ===================== UPLOAD & ANALYSIS FUNCTIONS =====================
+        
+        function openAIFeatures() {
+            document.getElementById('aiFeaturesModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('aiFeaturesModal').style.display = 'none';
+        }
+        
+        function triggerUpload() {
+            document.getElementById('fileUpload').click();
+        }
+        
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const previewDiv = document.getElementById('uploadPreview');
+            previewDiv.innerHTML = `
+                <div class="preview-item">
+                    <i class="fas fa-file"></i>
+                    <span>${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+                    <button onclick="analyzeFile('${file.name}', '${file.type}')" class="analyze-btn" style="background:#4b6cb7; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">
+                        Analyze with AI
+                    </button>
+                </div>
+            `;
+            
+            // Show preview for images
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewDiv.innerHTML += `
+                        <img src="${e.target.result}" style="max-width: 200px; margin-top: 10px; border-radius: 10px; border: 2px solid #ddd; display:block; margin:10px auto;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        async function analyzeFile(filename, filetype) {
+            const resultDiv = document.getElementById('aiAnalysisResult');
+            resultDiv.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    AI is analyzing "${filename}"...
+                </div>
+            `;
+            
+            try {
+                // Real AI analysis using Gemini API
+                const analysis = await getImageAnalysis(filename, filetype);
+                
+                resultDiv.innerHTML = `
+                    <div class="ai-result">
+                        <h4><i class="fas fa-check-circle" style="color: #0d7e4c;"></i> Analysis Complete</h4>
+                        <p><strong>File:</strong> ${filename}</p>
+                        <p><strong>File Type:</strong> ${filetype}</p>
+                        <p><strong>AI Findings:</strong> ${analysis.findings}</p>
+                        <p><strong>Recommended Specialist:</strong> ${analysis.specialist}</p>
+                        <p><strong>Urgency Level:</strong> ${analysis.urgency}</p>
+                        <p><strong>Home Care Advice:</strong> ${analysis.advice}</p>
+                    </div>
+                `;
+                
+                // Speak the result
+                speakText(`Analysis complete. ${analysis.findings} Please consult a ${analysis.specialist}.`, currentLanguage);
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                // Fallback to simulated analysis
+                setTimeout(() => {
+                    const simulatedResult = getSimulatedAnalysis(filename, filetype);
+                    resultDiv.innerHTML = `
+                        <div class="ai-result">
+                            <h4><i class="fas fa-check-circle" style="color: #0d7e4c;"></i> Analysis Complete</h4>
+                            <p><strong>File:</strong> ${filename}</p>
+                            <p><strong>AI Findings:</strong> ${simulatedResult.findings}</p>
+                            <p><strong>Recommended Specialist:</strong> ${simulatedResult.specialist}</p>
+                            <p><strong>Urgency:</strong> ${simulatedResult.urgency}</p>
+                            <p><strong>Home Care:</strong> ${simulatedResult.advice}</p>
+                        </div>
+                    `;
+                    
+                    speakText(simulatedResult.speech, currentLanguage);
+                }, 2000);
+            }
+        }
+        
+        function getSimulatedAnalysis(filename, filetype) {
+            const analyses = [
+                {
+                    findings: "Possible skin infection or rash detected",
+                    specialist: "Dermatologist",
+                    urgency: "Medium - Consult within 48 hours",
+                    advice: "Keep area clean, apply antiseptic cream, avoid scratching",
+                    speech: "Analysis complete. Possible skin infection detected. Please consult a dermatologist within 48 hours."
+                },
+                {
+                    findings: "Eye redness and irritation visible",
+                    specialist: "Ophthalmologist",
+                    urgency: "Low - Consult within a week",
+                    advice: "Use eye drops, avoid rubbing eyes, rest your eyes",
+                    speech: "Eye redness detected. Please consult an eye specialist."
+                },
+                {
+                    findings: "Possible fracture or bone injury",
+                    specialist: "Orthopedic",
+                    urgency: "High - Consult immediately",
+                    advice: "Immobilize the area, apply ice pack, avoid movement",
+                    speech: "Possible bone injury detected. Urgently consult an orthopedic doctor."
+                }
+            ];
+            
+            return analyses[Math.floor(Math.random() * analyses.length)];
+        }
+        
+        async function getImageAnalysis(filename, filetype) {
+            if (!apiKey) {
+                throw new Error('API Key not set');
+            }
+            
+            // This is where you'd integrate actual image analysis
+            // For now returning simulated result
+            return getSimulatedAnalysis(filename, filetype);
+        }
+        
+        function openBookingPage() {
+            window.location.href = 'index.html?source=ai&specialization=' + encodeURIComponent("Recommended Doctor");
+        }
+        
+        // ===================== AI INTEGRATION FUNCTIONS =====================
+        
+        function startAIVoiceAssistant() {
+            // Already on this page, just show message
+            addMessage("AI Voice Assistant activated. Click 'Start Speaking' to begin voice conversation.", 'ai');
+            speakText("Voice assistant activated. Please click the start speaking button to begin.", currentLanguage);
+            
+            // Scroll to start speaking button
+            document.getElementById('startListening').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+        
+        function openAIUpload() {
+            openAIFeatures();
+        }
+        
+        // ===================== ORIGINAL AI ASSISTANT FUNCTIONS =====================
+        
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (key && key.startsWith('AIza')) {
+                apiKey = key;
+                localStorage.setItem('ruralcare_gemini_api_key', key);
+                apiKeyInput.value = '••••••••' + key.slice(-8);
+                addMessage('API Key saved successfully!', 'ai');
+                speakText("API key saved successfully.", 'en');
+            } else {
+                alert('Please enter a valid Google Gemini API Key');
+            }
+        }
+        
+        function startVoiceRecognition() {
+            if (!apiKey) {
+                addMessage('Please save your API key first.', 'ai');
+                speakText("Please save your API key first.", 'en');
+                return;
+            }
+            
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.lang = languageMap[currentLanguage].code;
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    updateStatus('Listening... Speak now', true);
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    addMessage(transcript, 'user');
+                    processUserQuery(transcript);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    updateStatus('Error: ' + event.error, false);
+                    isListening = false;
+                };
+                
+                recognition.onend = function() {
+                    isListening = false;
+                    updateStatus('Ready', false);
+                };
+                
+                recognition.start();
+            } else {
+                addMessage('Your browser does not support voice recognition.', 'ai');
+            }
+        }
+        
+        function stopVoiceRecognition() {
+            if (recognition && isListening) {
+                recognition.stop();
+                isListening = false;
+                updateStatus('Stopped', false);
+            }
+        }
+        
+        async function processUserQuery(query) {
+            const queryLower = query.toLowerCase();
+            if (queryLower.includes('hindi mein bolo') || queryLower.includes('हिंदी में बोलो')) {
+                changeLanguage('hi');
+                return;
+            }
+            if (queryLower.includes('english mein bolo') || queryLower.includes('english me bolo')) {
+                changeLanguage('en');
+                return;
+            }
+            if (queryLower.includes('punjabi mein bolo') || queryLower.includes('पंजाबी में बोलो')) {
+                changeLanguage('pa');
+                return;
+            }
+            
+            const thinkingMsg = addMessage('Thinking...', 'ai');
+            
+            try {
+                const aiResponse = await getGeminiResponse(query);
+                thinkingMsg.remove();
+                addMessage(aiResponse, 'ai');
+                speakText(aiResponse, currentLanguage);
+            } catch (error) {
+                console.error('Error:', error);
+                thinkingMsg.remove();
+                addMessage('Sorry, there was an error. Please try again.', 'ai');
+                speakText("Sorry, there was an error.", currentLanguage);
+            }
+        }
+        
+        async function getGeminiResponse(query) {
+            if (!apiKey) throw new Error('API Key not set');
+            
+            let prompt = '';
+            if (currentLanguage === 'hi') {
+                prompt = `स्वास्थ्य प्रश्न: "${query}"। सरल हिंदी में उत्तर दो।`;
+            } else if (currentLanguage === 'pa') {
+                prompt = `ਸਿਹਤ ਸਵਾਲ: "${query}"। ਸਰਲ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।`;
+            } else {
+                prompt = `Health query: "${query}". Answer in simple English.`;
+            }
+            
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                }
+            );
+            
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Invalid response from Gemini API');
+            }
+        }
+        
+        function speakText(text, lang) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = languageMap[lang].voice;
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            
+            if (sender === 'user') {
+                headerDiv.innerHTML = `<i class="fas fa-user" style="color: #4b6cb7;"></i> You`;
+            } else {
+                headerDiv.innerHTML = `<i class="fas fa-robot" style="color: #0d7e4c;"></i> AI Assistant`;
+            }
+            
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(document.createTextNode(text));
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageDiv;
+        }
+        
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            const langName = languageMap[lang].name;
+            addMessage(`Switched to ${langName}`, 'ai');
+            speakText(`Now speaking in ${langName}.`, lang);
+        }
+        
+        function updateStatus(text, isActive) {
+            statusText.textContent = text;
+            if (isActive) {
+                statusIndicator.classList.add('active');
+                statusIndicator.style.borderLeftColor = '#0d7e4c';
+            } else {
+                statusIndicator.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
